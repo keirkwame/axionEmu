@@ -158,15 +158,16 @@ def data_collection(input):
 
 if __name__ == '__main__':
     inputs_list = []
-    for i in range(60):
-        pkl_name = 'LHD_parameters_5e5_mp'+str(i+80)+'.pkl'
-        outputs_name = '9params_5e5_mp_test_' + str(i+80)
-        os_name = 'test_os_mp_' + str(i+80)
-        pre_name = 'test_mp_' + str(i+80) + '_'
+    number_cores = 60 # number of cores you want to use in collecting data
+    for i in range(number_cores):
+        pkl_name = 'LHD_parameters_5e5_mp'+str(i)+'.pkl'
+        outputs_name = '9params_5e5_mp_test_' + str(i)
+        os_name = 'test_os_mp_' + str(i)
+        pre_name = 'test_mp_' + str(i) + '_'
         ele = (pkl_name, outputs_name, os_name, pre_name)
         inputs_list.append(ele)
     start_time = time()
-    p = Pool(60)
+    p = Pool(number_cores)
     p.map(data_collection,inputs_list)
    # data_collection(('LHD_parameters_2e5_0.pkl','9params_0','test_os_0','test_0_'))
     p.close()
