@@ -7,7 +7,7 @@ from scipy.io import FortranFile
 import sys
 import tensorflow_probability as tfp
 import tensorflow as tf
-import cosmopower as cp
+import axionEmu as cp
 
 class tf_planck2018_lite:
     '''
