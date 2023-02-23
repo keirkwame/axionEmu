@@ -27,19 +27,33 @@ def data_collection(input):
     collection['C_tt'] = []
     collection['C_ee'] = []
     collection['C_te'] = []
-    collection['C_bb'] = []
     collection['C_phi'] = []
     collection_1['k_index'] = []
     collection_1['matter_mg'] = []
     collection_2['k_index'] = []
     collection_2['matter_mg'] = []
+
+    # AL modif (make space for NL Pk)
+    collection_3['k_index'] = []
+    collection_3['matter_mg'] = []
+    collection_4['k_index'] = []
+    collection_4['matter_mg'] = []
+
     t_params = dict()
     t_params1 = dict()
     t_params2 = dict()
+    t_params3 = dict()
+    t_params4 = dict()
+    
+    # AL add z_lens generated from comoving distance
+    z_lens = np.loadtxt('optimal_z_array.dat')
+
     for key in params:
         t_params[key] = []
         t_params1[key]=[]
         t_params2[key] = []
+        t_params3[key]=[]
+        t_params4[key] = []
 #     var_param = ["ombh2", "omch2", "re_optical_depth    ", "hubble        ", "scalar_spectral_index(1) ", "scalar_amp(1)            "]
     params_keys = ['omega_b', 'omega_cdm', 'tau_reio', 'H_0','n_s', 'A_s', 'ma', 'omega_ax', 'z']
     s = 0
@@ -76,35 +90,61 @@ def data_collection(input):
             lines[55] = 'm_ax = '+str(ma)+'\n'
             lines[150] = 'transfer_redshift(1)    = '+str(z1)+'\n'
             lines[152] = 'transfer_redshift(2)    = '+str(z2)+'\n'
+
+            for i in range(len(z_lens)): #AL modif add Nz transfer calc
+                lines.append('transfer_redshift('+str(i+3)+')    = '+str(z_lens[i])+'\n')
+            
             os.system('rm '+params_ini_file)
             os.system('touch '+params_ini_file)
             f2 = open(params_ini_file, 'w')
             f2.writelines(lines)
             f2.close()
+
+            ## RUN CAMB ##
             os.system('./camb '+params_ini_file)
-            l_index, C_tt, C_ee, C_bb, C_te = np.loadtxt(pre_name+'_'+'lensedCls.dat', unpack = True)
+            
+            ## COLLECT DATA ##
+            #l_index, C_tt, C_ee, C_te = np.loadtxt(pre_name+'_'+'scalCls.dat', unpack = True) # now doing unlensed
+            unlensed_cls =  np.loadtxt(pre_name+'_'+'scalCls.dat')
             k_index, matter_mg = np.loadtxt(pre_name+'_'+'matterpower1.dat', unpack = True)
             k_index2, matter_mg2 = np.loadtxt(pre_name+'_'+'matterpower2.dat', unpack = True)
-            C_phi = np.loadtxt(pre_name+'_'+'scalCls.dat', unpack = True, usecols = 4)
+            #C_phi = np.loadtxt(pre_name+'_'+'scalCls.dat', unpack = True, usecols = 4)
+            
+            ## CLEAN UP FILES ##
             os.system('rm '+pre_name+'_'+'lensedCls.dat')
             os.system('rm '+pre_name+'_'+'matterpower1.dat')
             os.system('rm '+pre_name+'_'+'matterpower2.dat')
             os.system('rm '+pre_name+'_'+'scalCls.dat')
             os.system('rm '+pre_name+'_'+'transfer_out1.dat')
             os.system('rm '+pre_name+'_'+'transfer_out2.dat')
+            for i in range(len(z_lens)): #AL modif
+                os.system('rm '+pre_name+'_'+'matterpower'+str(i+3)'.dat')
+                os.system('rm '+pre_name+'_'+'transfer_out'+str(i+3)+'.dat')
             os.system('rm '+pre_name+'_'+'scalCovCls.dat')
             os.system('rm '+pre_name+'_'+'lenspotentialCls.dat')
             os.system('rm '+pre_name+'_'+'params.ini')
+            
+            ## PERFORM NON-LINEAR TRANSFORMS ##
+            T_path = pre_name+'_'+'transfer_out'
+            C_tt, C_ee, C_te, C_phi = do_non_linear_lensing(H_0, omega_cdm, omega_b, A_s, n_s, m_ax, omega_ax, z_lens, T_path, unlensed_cls)
+            matter_mg3 = do_non_linear_pk(H_0, omega_cdm, omega_b, A_s, n_s, m_ax, omega_ax, z1, T_path+'1')
+            matter_mg4 = do_non_linear_pk(H_0, omega_cdm, omega_b, A_s, n_s, m_ax, omega_ax, z2, T_path+'2')
+
+            ## APPEND OUTPUT TO COLLECTIONS ##
             collection['l_index'].append(l_index)
             collection['C_tt'].append(C_tt)
             collection['C_ee'].append(C_ee)
             collection['C_te'].append(C_te)
-            collection['C_bb'].append(C_bb)
             collection_1['k_index'].append(k_index)
             collection_1['matter_mg'].append(matter_mg)
             collection_2['k_index'].append(k_index2)
             collection_2['matter_mg'].append(matter_mg2)
+            collection_3['k_index'].append(k_index3)
+            collection_3['matter_mg'].append(matter_mg3)
+            collection_4['k_index'].append(k_index4)
+            collection_4['matter_mg'].append(matter_mg4)
             collection['C_phi'].append(C_phi)
+
             for key in params:
                 t_params[key].append(params[key][i])
                 t_params1[key].append(params[key][i])
@@ -134,6 +174,9 @@ def data_collection(input):
     collection['params'] = t_params
     collection_1['params'] = t_params1
     collection_2['params'] = t_params2
+    collection_3['params'] = t_params3
+    collection_4['params'] = t_params4
+
     ## set up index of .pkl file ##
     index_pkl = str(index_pkl_name)
     ## Finish setting up ##
