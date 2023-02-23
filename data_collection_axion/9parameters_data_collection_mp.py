@@ -8,6 +8,8 @@ import copy
 from time import time
 from multiprocessing import Pool
 
+from nonlinear.nonlinear_functions import *
+
 def data_collection(input):
     """
     LHD_para_pklfile = 'LHD_parameters_10000_0.pkl',
@@ -124,11 +126,11 @@ def data_collection(input):
             os.system('rm '+pre_name+'_'+'lenspotentialCls.dat')
             os.system('rm '+pre_name+'_'+'params.ini')
             
-            ## PERFORM NON-LINEAR TRANSFORMS ##
+            ## PERFORM NON-LINEAR TRANSFORMS & LENSING ##
             T_path = pre_name+'_'+'transfer_out'
-            C_tt, C_ee, C_te, C_phi = do_non_linear_lensing(H_0, omega_cdm, omega_b, A_s, n_s, m_ax, omega_ax, z_lens, T_path, unlensed_cls)
-            matter_mg3 = do_non_linear_pk(H_0, omega_cdm, omega_b, A_s, n_s, m_ax, omega_ax, z1, T_path+'1')
-            matter_mg4 = do_non_linear_pk(H_0, omega_cdm, omega_b, A_s, n_s, m_ax, omega_ax, z2, T_path+'2')
+            C_tt, C_ee, C_te, C_phi = do_non_linear_lensing(H_0, omega_cdm, omega_b, A_s, n_s, ma, omega_ax, z_lens, T_path, unlensed_cls)
+            matter_mg3 = do_non_linear_pk(H_0, omega_cdm, omega_b, A_s, n_s, ma, omega_ax, z1, T_path+'1')
+            matter_mg4 = do_non_linear_pk(H_0, omega_cdm, omega_b, A_s, n_s, ma, omega_ax, z2, T_path+'2')
 
             ## APPEND OUTPUT TO COLLECTIONS ##
             collection['l_index'].append(l_index)
