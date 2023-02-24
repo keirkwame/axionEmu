@@ -48,7 +48,7 @@ def data_collection(input):
     t_params4 = dict()
     
     # AL add z_lens generated from comoving distance
-    z_lens = np.loadtxt('optimal_z_array.dat')
+    z_lens = np.loadtxt('../nonlinear/optimal_z_array.dat')
 
     for key in params:
         t_params[key] = []
