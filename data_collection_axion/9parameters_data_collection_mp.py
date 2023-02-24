@@ -120,7 +120,7 @@ def data_collection(input):
             os.system('rm '+pre_name+'_'+'transfer_out1.dat')
             os.system('rm '+pre_name+'_'+'transfer_out2.dat')
             for i in range(len(z_lens)): #AL modif
-                os.system('rm '+pre_name+'_'+'matterpower'+str(i+3)'.dat')
+                os.system('rm '+pre_name+'_'+'matterpower'+str(i+3)+'.dat')
                 os.system('rm '+pre_name+'_'+'transfer_out'+str(i+3)+'.dat')
             os.system('rm '+pre_name+'_'+'scalCovCls.dat')
             os.system('rm '+pre_name+'_'+'lenspotentialCls.dat')
