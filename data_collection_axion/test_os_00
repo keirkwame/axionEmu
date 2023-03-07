@@ -11,7 +11,7 @@ get_transfer   = T
 
 #if do_lensing then scalar_output_file contains additional columns of l^4 C_l^{pp} and l^3 C_l^{pT}
 #where p is the projected potential. Output lensed CMB Cls (without tensors) are in lensed_output_file below.
-do_lensing     = T
+do_lensing     = F
 
 # 0: linear, 1: non-linear matter power (HALOFIT), 2: non-linear CMB lensing (HALOFIT)
 do_nonlinear = 0
@@ -143,18 +143,18 @@ CMB_outputscale = 7.4311e12
 #transfer_k_per_logint=5 samples fixed spacing in log-k
 #transfer_interp_matterpower =T produces matter power in regular interpolated grid in log k; 
 # use transfer_interp_matterpower =F to output calculated values (e.g. for later interpolation)
-transfer_high_precision = F
+transfer_high_precision = T
 transfer_kmax           = 10 #P_k_max_h/Mpc = 1.(CLASS)
 transfer_k_per_logint   = 0
 transfer_num_redshifts  = 2
 transfer_interp_matterpower = T
 transfer_redshift(1)    = 2.6
-transfer_filename(1)    = transfer_out1.dat
+transfer_filename(1)    = transfer_1.dat
 transfer_redshift(2)    = 2.1
-transfer_filename(2)    = transfer_out2.dat
+transfer_filename(2)    = transfer_2.dat
 #Matter power spectrum output against k/h in units of h^{-3} Mpc^3
-transfer_matterpower(1) = matterpower1.dat
-transfer_matterpower(2) = matterpower2.dat
+transfer_matterpower(1) = matterpower_1.dat
+transfer_matterpower(2) = matterpower_2.dat
 
 #Output files not produced if blank. make camb_fits to use use the FITS setting.
 scalar_output_file = scalCls.dat

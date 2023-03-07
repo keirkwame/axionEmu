@@ -5,7 +5,7 @@ import pickle
 # number of parameters and samples
 
 n_params = 9
-n_samples = 120 #120000 
+n_samples = 120000 
 
 # parameter ranges
 

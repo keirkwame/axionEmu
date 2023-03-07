@@ -35,21 +35,22 @@ model_parameters = ['h',
                     'omega_ax' 
                     ]
 
-list_index = np.linspace(0,239,240)
-list_index = np.delete(list_index, 167)
+#list_index = np.linspace(0,239,240)
+list_index = np.linspace(0, 31, 32)
+#list_index = np.delete(list_index, 167)
 
 import pickle
 collection_list = []
 for i in list_index:
     i = int(i)
-    f = open('./test_data_collect_9params_5e5_mp_test_'+str(i)+'.pkl', 'rb')
+    f = open('../data_collection_axion/test_data_collect_9params_5e5_mp_test_'+str(i)+'.pkl', 'rb')
     collection = pickle.load(f)
     f.close()
     print(len(collection['C_tt']))
     collection_list.append(collection)
-for i in np.linspace(240,299,60):
+for i in np.linspace(32, 39, 8): #np.linspace(240,299,60):
     i = int(i)
-    f = open('./test_data_collect_9params_5e5_mp_test_'+str(i)+'.pkl', 'rb')
+    f = open('../data_collection_axion/test_data_collect_9params_5e5_mp_test_'+str(i)+'.pkl', 'rb')
     collection = pickle.load(f)
     f.close()
     print(len(collection['C_tt']))
@@ -64,15 +65,15 @@ for key in collection['params']:
 
 C_tt_list = []
 C_ee_list = []
-C_bb_list = []
+#C_bb_list = []
 C_te_list = []
 C_phi_list =[]
 
-for i in range(299):
+for i in range(39):#range(299):
     para = collection_list[i]['params']
     C_tt_list.extend(collection_list[i]['C_tt'])
     C_ee_list.extend(collection_list[i]['C_ee'])
-    C_bb_list.extend(collection_list[i]['C_bb'])
+    #C_bb_list.extend(collection_list[i]['C_bb'])
     C_te_list.extend(collection_list[i]['C_te'])
     C_phi_list.extend(collection_list[i]['C_phi'])
     for key in para:
@@ -119,6 +120,9 @@ testing_spectra = spectra_[cut_off:,:]
 print('number of training spectra: ', training_log_spectra.shape)
 print('number of testing spectra: ', testing_spectra.shape)
 
+import sys
+sys.path.append("../")
+sys.path.append("../../")
 from cosmopower import cosmopower_NN
 
 # instantiate NN class
@@ -179,7 +183,8 @@ for i in range(3):
 plt.savefig('examples_reconstruction_TT_5e5_0.pdf')
 
 # load noise models from the SO noise repo
-noise_levels_load = np.loadtxt('./so_noise_models/LAT_comp_sep_noise/v3.1.0/SO_LAT_Nell_T_atmv1_goal_fsky0p4_ILC_CMB.txt')
+#noise_levels_load = np.loadtxt('./so_noise_models/LAT_comp_sep_noise/v3.1.0/SO_LAT_Nell_T_atmv1_goal_fsky0p4_ILC_CMB.txt')
+noise_levels_load = np.loadtxt('../SOnoise/SO_LAT_Nell_T_atmv1_goal_fsky0p4_ILC_CMB.txt')
 conv_factor = (2.7255e6)**2
 
 ells = noise_levels_load[:, 0]
