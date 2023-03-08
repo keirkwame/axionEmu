@@ -47,8 +47,8 @@ import pickle
 collection_list = []
 for i in list_index:
     #if i > 79: #DE-like data only
-    #if i <= 79: #DM-like data only
-    if (i >= 80) and (i <= 139): #C1 data only #139
+    if i <= 79: #DM-like data only
+    #if (i >= 80) and (i <= 139): #C1 data only #139
         i = int(i)
         f = open('/home/anran/axionCAMB/test_data_collect_9params_5e5_mp_test_'+str(i)+'.pkl', 'rb')
         collection = pickle.load(f)
@@ -90,7 +90,7 @@ for i in range(len(collection_list)): #239): #299):
       parameters_list[key] = np.concatenate((parameters_list[key], para[key]))
 
 import copy
-cut_off = int(.8 * len(parameters_list['H_0'])) #All data: 216000 #448920
+cut_off = int(.9 * len(parameters_list['H_0'])) #DM: 360000 #All data & DE: 216000 #448920
 print('Training/testing cut_off index =', cut_off)
 training_parameters_ = copy.deepcopy(parameters_list)
 h_0 = training_parameters_['H_0'][:cut_off]/100
@@ -157,23 +157,24 @@ cp_nn = cosmopower_NN(parameters=model_parameters,
 #                 max_epochs = [1000,1000,1000,1000,1000, 1000],
 #                 )
 
-with tf.device('/device:GPU:0'): # ensures we are running on a GPU
+'''with tf.device('/device:GPU:0'): # ensures we are running on a GPU
     # train
     cp_nn.train(training_parameters=training_parameters,
                 training_features=training_log_spectra,
-                filename_saved_model='../axion_CMB_models/TT_cp_NN_5e5_C1_128_t2',
+                filename_saved_model='../axion_CMB_models/TT_cp_NN_5e5_DM_t2',
                 # cooling schedule
                 validation_split=0.1,
                 learning_rates=[1e-2, 1e-3, 1e-4, 1e-5, 1e-6, 1e-6],
-                batch_sizes=[128,]*6, #[2048,2048,2048,2048,2048,2048],
+                batch_sizes=[512,]*6, #[2048,2048,2048,2048,2048,2048],
                 gradient_accumulation_steps = [1, 1, 1, 1, 1, 1],
                 # early stopping set up
                 patience_values = [100,100,100,100,100,100],
                 max_epochs = [1000,1000,1000,1000,1000, 1000],
                 )
+'''
 
 cp_nn = cosmopower_NN(restore=True, 
-                      restore_filename='../axion_CMB_models/TT_cp_NN_5e5_C1_128_t2', #'TT_cp_NN_5e5_t2',
+                      restore_filename='../axion_CMB_models/TT_cp_NN_5e5_DM_t2', #'TT_cp_NN_5e5_t2',
                       )
 
 predicted_testing_spectra = cp_nn.ten_to_predictions_np(test_parameters)
@@ -188,7 +189,7 @@ for i in range(3):
     ax[i].set_xlabel('$\ell$', fontsize='x-large')
     ax[i].set_ylabel('$\\frac{\ell(\ell+1)}{2 \pi} C_\ell$', fontsize='x-large')
     ax[i].legend(fontsize=15)
-plt.savefig('examples_reconstruction_TT_5e5_0_C1_128.pdf')
+plt.savefig('examples_reconstruction_TT_5e5_0_DM_2.pdf')
 
 # load noise models from the SO noise repo
 noise_levels_load = np.loadtxt('/home/keir/Software/so_noise_models/LAT_comp_sep_noise/v3.1.0/SO_LAT_Nell_T_atmv1_goal_fsky0p4_ILC_CMB.txt')
@@ -229,7 +230,7 @@ ax.yaxis.set_major_locator(plt.MaxNLocator(5))
 plt.setp(ax.get_xticklabels(), fontsize=25)
 plt.setp(ax.get_yticklabels(), fontsize=25)
 plt.tight_layout()
-plt.savefig('./accuracy_emu_TT_C1_128_5e5_t2.pdf')
+plt.savefig('./accuracy_emu_TT_DM_2_5e5_t2.pdf')
 
 diff_=np.sum(diff,axis = 1)
 print('diff_.shape is ', diff_.shape)
@@ -246,4 +247,4 @@ for i in range(8):
     h = bad_params[pa]
     ax[i].plot(h, 'o')
     ax[i].set_ylabel(pa, fontsize='x-large')
-plt.savefig('bad_params_5e5_2_C1_128.pdf')
+plt.savefig('bad_params_5e5_2_DM_2.pdf')
