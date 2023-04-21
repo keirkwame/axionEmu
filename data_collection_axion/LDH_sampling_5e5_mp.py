@@ -4,26 +4,26 @@ import pickle
 
 # number of parameters and samples
 
-n_params = 9
-n_samples = 120000 
+n_params = 10
+n_samples = 120000 #150000 
 
 # parameter ranges
 
-obh2 =      np.linspace(0.0174, 0.0274, n_samples)
-omaxh2 =     np.linspace(1e-32, 0.01   ,   n_samples)
+obh2 =      np.linspace(0.019, 0.026, n_samples)
+omaxh2 =     np.linspace(1e-32, 0.14   ,   n_samples)
 H_0 =         np.linspace(55.0,    82.0,    n_samples) 
 ns =        np.linspace(0.86, 1.07,    n_samples)
 As =      np.linspace(5e-10,    2.6e-9,    n_samples)
-tau_reio = np.linspace(0.01, 0.26,    n_samples)
+tau_reio = np.linspace(0.02, 0.12,    n_samples)
 z = np.linspace(2.51,5.0, n_samples)
 #ma = np.linspace(-29.30103, -26.30103, n_samples)
-ma = np.linspace(-26, -24, n_samples)
-#sum_omega = np.linspace(0.16, 0.36, n_samples) # sum of omaxh2 and omlambda in dark-energy region
-omch2 = np.linspace(0.08, 0.20, n_samples)
+ma = np.linspace(-27, -24, n_samples)
+sum_omega = np.linspace(0.09, 0.14, n_samples) # sum of omaxh2 and omlambda in dark-energy region #sum of omaxh2 and omch2 in dark-matter region
+omch2 = np.linspace(1.e-32, 0.14, n_samples)
 
 # LHS grid
 
-AllParams = np.vstack([obh2, omaxh2, H_0, ns, As, tau_reio, z, ma, omch2])
+AllParams = np.vstack([obh2, omaxh2, H_0, ns, As, tau_reio, z, ma, omch2, sum_omega])
 lhd = pyDOE.lhs(n_params, samples=n_samples, criterion=None)
 idx = (lhd * n_samples).astype(int)
 
@@ -49,11 +49,16 @@ params = {'omega_b': AllCombinations[:, 0],
 #omega_cdm = np.where(omega_cdm >0, omega_cdm, np.ones(len(omega_cdm))*1e-32)
 #params['omega_cdm'] = omega_cdm
 
+#Enforce sum_omega in DM-like region
+omega_ax = AllCombinations[:, 9] - params['omega_cdm']
+omega_ax = np.where(omega_ax > 0., omega_ax, np.ones(len(omega_ax)) * 1.e-32)
+params['omega_ax'] = omega_ax
+
 data_pkl = 'LHD_parameters_5e5_mp.pkl' #the .pkl that stores all input parameters
 f = open(data_pkl, 'wb')
 pickle.dump(params, f)
 f.close()
-num_subfile = 40 # this number should be in consistent with number_cores variable in the 9parameters_data_collection_mp.py file
+num_subfile = 120 # this number should be in consistent with number_cores variable in the 9parameters_data_collection_mp.py file
 num_samples_per_subfile = int(n_samples/num_subfile)
 for i in range(num_subfile):
     start = int(i*num_samples_per_subfile)

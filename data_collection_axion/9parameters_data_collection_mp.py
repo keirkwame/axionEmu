@@ -110,7 +110,7 @@ def data_collection(input):
                 for j in range(len(z_lens)): #AL modif add Nz transfer calc
                     lines.extend('transfer_redshift('+str(j+1)+')    = '+str(z_lens[::-1][j])+'\n')
             
-            os.system('rm '+params_ini_file)
+            os.system('rm -r '+params_ini_file)
             os.system('touch '+params_ini_file)
             f2 = open(params_ini_file, 'w')
             f2.writelines(lines)
@@ -125,7 +125,7 @@ def data_collection(input):
             k_index, matter_mg = np.loadtxt(pre_name+'_'+'matterpower_1.dat', unpack = True)
             k_index2, matter_mg2 = np.loadtxt(pre_name+'_'+'matterpower_2.dat', unpack = True)
             
-            os.system('rm '+pre_name+'_'+'params.ini')
+            os.system('rm -r '+pre_name+'_'+'params.ini')
             
             ## PERFORM NON-LINEAR TRANSFORMS & LENSING ##
             T_path = pre_name+'_'+'transfer_'
@@ -147,10 +147,13 @@ def data_collection(input):
             matter_mg4 = matter_mg2 #do_non_linear_pk(H_0, omega_cdm, omega_b, A_s, n_s, ma, omega_ax, z2, T_path+'2')
 
             ## CLEAN UP FILES ## 
-            os.system('rm '+pre_name+'_'+'scalCls.dat')
+            os.system('rm -r '+pre_name+'_'+'scalCls.dat')
             for j in range(len(z_lens)): #AL modif
-                os.system('rm '+pre_name+'_'+'matterpower_'+str(j+1)+'.dat')
-                os.system('rm '+pre_name+'_'+'transfer_'+str(j+1)+'.dat')
+                os.system('rm -r '+pre_name+'_'+'matterpower_'+str(j+1)+'.dat')
+                transfer_fname = pre_name+'_'+'transfer_'+str(j+1)+'.dat'
+                print('Removing transfer files for', transfer_fname)
+                os.system('rm -r '+pre_name+'_'+'transfer_'+str(j+1)+'.dat')
+                print('Finished removing transfer files for', transfer_fname)
 
             ## APPEND OUTPUT TO COLLECTIONS ##
             collection['l_index'].append(l_index)
@@ -224,12 +227,12 @@ def data_collection(input):
 
 if __name__ == '__main__':
     inputs_list = []
-    number_cores = 40 # number of cores you want to use in collecting data
+    number_cores = 120 # number of cores you want to use in collecting data
     for i in range(number_cores):
         pkl_name = 'LHD_parameters_5e5_mp'+str(i)+'.pkl'
         outputs_name = '9params_5e5_mp_test_' + str(i)
         os_name = 'test_os_mp_' + str(i)
-        pre_name = 'test_mp_' + str(i) + '_'
+        pre_name = 'test_mp_' + str(i) + '/test_mp_' + str(i) + '_'
         ele = (pkl_name, outputs_name, os_name, pre_name)
         inputs_list.append(ele)
     start_time = time()
