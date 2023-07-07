@@ -22,3 +22,8 @@ notebooks/.ipynb_checkpoints
 notebooks/likelihoods_notebooks/.ipynb_checkpoints
 notebooks/getting_started_notebooks/.ipynb_checkpoints
 notebooks/training_notebooks/.ipynb_checkpoints
+
+data_collection_axion/test_os_mp*
+data_collection_axion/test_os_HMcode*
+data_collection_axion/test_os_9*
+data_collection_axion/*.pkl

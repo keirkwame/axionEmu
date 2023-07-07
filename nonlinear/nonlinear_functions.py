@@ -63,13 +63,14 @@ def get_limber_clkk_flat_universe(results, interp_pk, lmax, kmax, nz, zsrc=None)
     return cl_kappa
 
 
-def do_non_linear_lensing(H0, omch2, ombh2, As, ns, m_ax, omaxh2, zs, T_path):
+def do_non_linear_lensing(H0, omch2, ombh2, As, ns, m_ax, omaxh2, gamma_1, gamma_2, zs, T_path, return_matter_power=False):
     '''
     Compute the non-linear matter power spectra, lensed cls, and lensing potential using axionHMCode
     
     Inputs:
     first five inputs are the regular cosmological parameters
     m_ax, omaxh2 are the axion parameters (mass in eV and relic density)
+    gamma_1, gamma_2 are the concentration-mass relation nuisance parameters
     zs are the redshifts (must be increasing)
     T_path is the directory where the previously generated transfer functions are (same redshifts as zs)
     
@@ -103,57 +104,70 @@ def do_non_linear_lensing(H0, omch2, ombh2, As, ns, m_ax, omaxh2, zs, T_path):
     cosmos['z']     = 0.
     cosmos['transfer_kmax'] = 20
 
-    # Compute camb background cosmology
-    pars = camb.CAMBparams()
-    pars.set_cosmology(H0=H0, ombh2=ombh2, omch2=(omch2+omaxh2), mnu=0.06, omk=0) # account for axion DM
-    r = camb.get_background(pars)
+    cosmos['gamma_1'] = gamma_1
+    cosmos['gamma_2'] = gamma_2
 
-    # Read in Tk and Weyl potential
-    weyl_trans_list = []
-    kh_trans_list   = []
-    for i in range(1, len(zs)+1)[::-1]:
-        Tk = np.loadtxt(T_path+str(i)+'.dat')
-        kh_trans_list.append(Tk[:,0])
-        weyl_trans_list.append(Tk[:,-2])
-    
-    kh_trans_list = np.array(kh_trans_list)
-    weyl_trans_list = np.array(weyl_trans_list)
+    if not return_matter_power:
+        # Compute camb background cosmology
+        pars = camb.CAMBparams()
+        pars.set_cosmology(H0=H0, ombh2=ombh2, omch2=(omch2+omaxh2), mnu=0.06, omk=0) # account for axion DM
+        r = camb.get_background(pars)
 
-    # Weyl Pk from primordial Pk
-    h = cosmos['h']
-    kh = kh_trans_list[0]
-    k = kh * h
-    Pk0 = As * (k/0.05)**(ns-1)*kh**4 / (kh**3/(2*np.pi**2)) *h
-    weyl_Pk_lin = Pk0 * weyl_trans_list**2
-    
+        # Read in Tk and Weyl potential
+        weyl_trans_list = []
+        kh_trans_list   = []
+        for i in range(1, len(zs)+1)[::-1]:
+            print('Loading Weyl transfer file:', T_path+str(i)+'.dat')
+            Tk = np.loadtxt(T_path+str(i)+'.dat')
+            kh_trans_list.append(Tk[:,0])
+            weyl_trans_list.append(Tk[:,-2])
+        
+        kh_trans_list = np.array(kh_trans_list)
+        weyl_trans_list = np.array(weyl_trans_list)
+
+        # Weyl Pk from primordial Pk
+        h = cosmos['h']
+        kh = kh_trans_list[0]
+        k = kh * h
+        Pk0 = As * (k/0.05)**(ns-1)*kh**4 / (kh**3/(2*np.pi**2)) *h
+        weyl_Pk_lin = Pk0 * weyl_trans_list**2
+
     # Compute non-linear using axionHMCode
     PkL_list = []
     PkNL_list = []
+    k_list = []
     M_arr = np.logspace(8, 17, 100)
     
     for i in range(len(zs)):
         cosmos_specific_z = cosmos.copy()
-        cosmos_specific_z['z'] = zs[i]
-    
-        power_spec_dic = lin_power_spectrum.func_power_spec_dic(T_path + str(i+1)+'.dat',
+        cosmos_specific_z['z'] = zs[::-1][i] #Looping through decreasing redshift
+
+        if not return_matter_power:
+            transfer_file_name = T_path + str(i+1)+'.dat'
+        else:
+            transfer_file_name = T_path + '.dat'
+        print('Transfer file name', transfer_file_name, cosmos_specific_z['z'])
+
+        power_spec_dic = lin_power_spectrum.func_power_spec_dic(transfer_file_name,
                                                                           cosmos_specific_z)
         
         PkL_list.append(power_spec_dic['power_total'])
-        if zs[i] >= 6.5:
+        #k_list.append(power_spec_dic['k'])
+        if cosmos_specific_z['z'] >= 6.5: #zs[i] >= 6.5:
             PkNL_list.append(power_spec_dic['power_total'])
         
         else:
             power_spec_interp_dic = lin_power_spectrum.func_power_spec_interp_dic(power_spec_dic, 
                                                                                         cosmos_specific_z)
-            hmcode_params = HMcode_params.HMCode_param_dic(cosmos, 
+            hmcode_params = HMcode_params.HMCode_param_dic(cosmos_specific_z, 
                                                            power_spec_interp_dic['k'], 
                                                            power_spec_interp_dic['cold'])
         
-            axion_param = axion_params.func_axion_param_dic(M_arr, cosmos, power_spec_interp_dic, eta_given=False)
+            axion_param = axion_params.func_axion_param_dic(M_arr, cosmos_specific_z, power_spec_interp_dic, eta_given=False)
             PS_matter_nonlin = PS_nonlin_axion.func_full_halo_model_ax(M_arr, 
                                                                        power_spec_dic, 
                                                                        power_spec_interp_dic, 
-                                                                       cosmos, 
+                                                                       cosmos_specific_z, 
                                                                        hmcode_params, 
                                                                        axion_param, 
                                                                        alpha = True, 
@@ -163,24 +177,28 @@ def do_non_linear_lensing(H0, omch2, ombh2, As, ns, m_ax, omaxh2, zs, T_path):
             PkNL_list.append(PS_matter_nonlin[0])
     
     # Non-linear transfer function
-    PkL_list = np.array(PkL_list[::-1])
+    PkL_list = np.array(PkL_list[::-1]) #Increasing redshift
     PkNL_list = np.array(PkNL_list[::-1])
 
     TkNL2 = PkNL_list/PkL_list
-        
-    # Create interpolator for Limber integral
-    P_weyl_NL = RectBivariateSpline(zs, k, TkNL2 * weyl_Pk_lin)
-    
-    # Perform Limber integral
-    clkk_NL = get_limber_clkk_flat_universe(r, P_weyl_NL, 6300, cosmos['transfer_kmax'], 100, zsrc=None)
-    
-    # Change to phi
-    clpp_NL = 4*clkk_NL/2/np.pi
-    
-    return clpp_NL
-    
 
-def do_nonlinear_pk(H0, omch2, ombh2, As, ns, m_ax, omaxh2, z, T_path):
+    if not return_matter_power:
+        # Create interpolator for Limber integral
+        P_weyl_NL = RectBivariateSpline(zs, k, TkNL2 * weyl_Pk_lin)
+        
+        # Perform Limber integral
+        clkk_NL = get_limber_clkk_flat_universe(r, P_weyl_NL, 6300, cosmos['transfer_kmax'], 100, zsrc=None)
+        
+        # Change to phi
+        clpp_NL = 4*clkk_NL/2/np.pi
+        
+        return clpp_NL, PkNL_list, PkL_list, power_spec_dic['k'], k, zs, weyl_Pk_lin
+    else:
+        print(len(PkNL_list[0]))
+        return PkNL_list[0], power_spec_dic['k'], power_spec_interp_dic['k']
+
+
+def do_nonlinear_pk(H0, omch2, ombh2, As, ns, m_ax, omaxh2, gamma_1, gamma_2, z, T_path):
     '''
     Compute non-linear power spectrum from linear transfer functions
     same parameters as do_nonlinear_lensing except for Cls
@@ -212,24 +230,25 @@ def do_nonlinear_pk(H0, omch2, ombh2, As, ns, m_ax, omaxh2, z, T_path):
     cosmos['z']     = z
     cosmos['transfer_kmax'] = 20
 
+    cosmos['gamma_1'] = gamma_1
+    cosmos['gamma_2'] = gamma_2
 
+    M_arr = np.logspace(8, 17, 100)
+
+    print('Generated dictionary')
+    print('Loading this transfer file (for redshift):', T_path + '.dat', cosmos['z'])
     power_spec_dic = lin_power_spectrum.func_power_spec_dic(T_path + '.dat', cosmos)
+    print('Linear power')
     power_spec_interp_dic = lin_power_spectrum.func_power_spec_interp_dic(power_spec_dic, cosmos)
+    print('Linear power interpolated')
     hmcode_params = HMcode_params.HMCode_param_dic(cosmos,
                                                    power_spec_interp_dic['k'],
                                                    power_spec_interp_dic['cold'])
+    print('HMcode parameters')
+    #print(M_arr, cosmos, power_spec_interp_dic)
+    axion_param = axion_params.func_axion_param_dic(M_arr, cosmos, power_spec_interp_dic, eta_given=False)
+    print('Preliminary calculations')
+    PS_matter_nonlin = PS_nonlin_axion.func_full_halo_model_ax(M_arr, power_spec_dic, power_spec_interp_dic, cosmos, hmcode_params, axion_param, alpha = True, eta_given = False, one_halo_damping = True, two_halo_damping = True)
+    print('Calculated halo model power')
 
-    PS_matter_nonlin = PS_nonlin_axion.full_halo_model_ax(M_arr,
-                                                          power_spec_dic['k'],
-                                                          power_spec_dic['power_total'],
-                                                          power_spec_interp_dic['k'],
-                                                          power_spec_interp_dic['cold'],
-                                                          cosmos_specific_z,
-                                                          hmcode_params,
-                                                          cosmos['Omega_m_0'],
-                                                          cosmos['Omega_db_0'],
-                                                          alpha = True,
-                                                          eta_given = False,
-                                                          one_halo_damping = True,
-                                                          two_halo_damping = True)
     return PS_matter_nonlin[0]

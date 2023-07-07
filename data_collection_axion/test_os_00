@@ -226,7 +226,7 @@ number_of_threads       = 0
 #Note increasing accuracy_boost parameters is very inefficient if you want higher accuracy,
 #but high_accuracy_default is efficient 
 
-high_accuracy_default=F
+high_accuracy_default=T
 
 #Increase accuracy_boost to decrease time steps, use more k values,  etc.
 #Decrease to speed up at cost of worse accuracy. Suggest 0.8 to 3.
