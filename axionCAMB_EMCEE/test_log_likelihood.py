@@ -4,6 +4,7 @@
 from planck_lite_py import PlanckLitePy
 import pyactlike
 import numpy as np
+import scipy.integrate as spi
 import os
 
 # get ls, Dltt, Dlte, Dlee
@@ -108,11 +109,29 @@ def Pk_generator(theta):
         #os.system('rm ' + predex + 'lenspotentialCls.dat')
         os.system('rm ' + predex + 'params.ini')
         os.system('rm ' + new_file)
-        return (k, Pk)
+
+        #Calculate sigma8
+        k0, Pk0 = np.loadtxt(predex+'matterpower_z0.dat', unpack = True)
+        sigma8 = get_sigma_r(k0, Pk0, r=8.)
+        os.system('rm ' + predex + 'transfer_out_z0.dat')
+        os.system('rm ' + predex + 'matterpower_z0.dat')
+
+        return (k, Pk, sigma8)
     except Exception:
         os.system('rm ' + new_file)
         os.system('rm ' + predex + 'params.ini')
         return -np.inf
+
+def get_sigma_r(k, Pk, r=8.):
+    """Calculate sigma_r given matter power spectrum. r is in Mpc/h"""
+    x = k * r
+    j1 = (np.sin(x) / x) - np.cos(x)
+    Pk_dim = ((k ** 3.) * Pk) / (2. * (np.pi ** 2.))
+    integrand = ((3. * j1 / x) ** 2.) * (Pk_dim ** 2.)
+    variance = spi.trapezoid(integrand, x=np.log(k))
+    sigma_r = np.sqrt(variance)
+    print('Sigma_r =', sigma_r)
+    return sigma_r
 
 def TTTEEE_generator_lamda(theta):
     """
@@ -215,9 +234,9 @@ def log_likelihood_Lyaf(theta_):
 
     results = Pk_generator(theta_extended)
     if results == -np.inf:
-        return -np.inf
+        return -np.inf, np.nan
     else:
-        k, Pk = results
+        k, Pk, sigma8 = results
         #C_tt = C_tt/(A_plank**2)
         #C_te = C_te/(A_plank**2)
         #C_ee = C_ee/(A_plank**2)
@@ -242,4 +261,4 @@ def log_likelihood_Lyaf(theta_):
 
         print('Log likelihood =', loglike)
         #TTTEEE2018_lowTTbins.loglike(C_tt, C_te, C_ee, int(l_index[0]))
-        return loglike
+        return loglike, sigma8

@@ -35,12 +35,14 @@ def log_posterior(x, parameters_and_priors):
                           'A_s': [?,  ?,  'uniform'],
                            }"""
     log_prior_value = log_prior(parameters_and_priors, x)
+
+    #Fix axion parameters
+    x = np.insert(x, 6, [-26., 1.e-9])
+    print('Parameters =', x)
+
     if log_prior_value == -np.inf:
         return -np.inf, np.nan
     else:
-        x = np.insert(x, 6, np.array([-26., 1.e-9]))
-        print('Parameters =', x)
-
         log_likelihood_value, sigma8 = log_likelihood_Lyaf(x)
         if log_likelihood_value == -np.inf:
             return -np.inf, sigma8
@@ -58,8 +60,8 @@ ndim = 7
 nwalkers = 120 
 
 # set fiducial values and radius
-FIDUCIAL = np.reshape(np.array([0.022242,  0.1,  0.673,  0.065,  0.9658,  3.0753, 1.0]).astype('float32'), (1, 7))
-EPSILON  = np.reshape(np.array([1e-4,      1e-3,     1e-2,   1e-3,   1e-3,    1e-3, 1E-4]).astype('float32'), (1,7))
+FIDUCIAL = np.reshape(np.array([0.022242,  0.1,  0.673,  0.065,  0.9658,  3.0753, 1.0]).astype('float32'), (1, 7)) #-26.1, 0.006,
+EPSILON  = np.reshape(np.array([1e-4,      1e-3,     1e-2,   1e-3,   1e-3,    1e-3, 1E-4]).astype('float32'), (1,7)) #1E-3,      1E-4,
 
 
 
@@ -83,16 +85,15 @@ parameters_and_priors = {'omega_b':      [0.0174, 0.0274, 'uniform'],
                          'n_s':          [0.86, 1.07,   'uniform'],
                          'ln10^{10}A_s': [1.61,  3.4,  'uniform'],
                          'A_planck':     [1.0,   0.0025,  'gaussian']}
- #                        'm_ax': [-27.5, -22., 'uniform'],
- #                        'omega_ax': [1.e-32, 0.14,  'uniform'],
-
+#                         'm_ax': [-27.5, -22., 'uniform'],
+#                         'omega_ax': [1.e-32, 0.14,  'uniform'],
 
 from multiprocessing import Pool
 import pickle
 with Pool(processes=60) as pool:
     # Set up the backend
     # Don't forget to clear it in case the file already exists
-    filename = "Lyaf_eBOSS_Planck_5_LCDM.h5"
+    filename = "Lyaf_eBOSS_Planck_5_LCDM_2.h5"
     backend = emcee.backends.HDFBackend(filename)
     backend.reset(nwalkers, ndim)
     sampler = emcee.EnsembleSampler(nwalkers, ndim, log_posterior, args=[parameters_and_priors], pool=pool,backend=backend)
@@ -117,12 +118,22 @@ with Pool(processes=60) as pool:
     samples_flat = sampler.get_chain(flat=True)
     end = time.time()
     diff = end - start
-    data_pkl = 'Lyaf_eBOSS_Planck_axionCAMB_5_LCDM'+'.pkl'
+
+    #Save sigma_8
+    samples_sigma8_unflat = sampler.get_blobs()
+    samples_sigma8_flat = sampler.get_blobs(flat=True)
+
+    data_pkl = 'Lyaf_eBOSS_Planck_axionCAMB_5_LCDM_2'+'.pkl'
     print('Dump data and time to '+data_pkl+'...')
     f = open(data_pkl,'wb')
     pickle.dump(samples_unflat,f)
     pickle.dump(samples_flat,f)
     pickle.dump(diff, f)
+
+    #Save sigma_8
+    pickle.dump(samples_sigma8_unflat,f)
+    pickle.dump(samples_sigma8_flat,f)
+
     pickle.dump(sampler, f)
     pickle.dump(index, f)
     pickle.dump(autocorr, f)
@@ -137,8 +148,5 @@ with Pool(processes=60) as pool:
     plt.ylim(0, y.max() + 0.1 * (y.max() - y.min()))
     plt.xlabel("number of steps")
     plt.ylabel(r"mean $\hat{\tau}$")
-    plt.savefig('convergence_test_Lyaf_eBOSS_Planck_5_LCDM.png')
-
-
-
+    plt.savefig('convergence_test_Lyaf_eBOSS_Planck_5_LCDM_2.png')
 
