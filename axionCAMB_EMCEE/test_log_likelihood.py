@@ -5,6 +5,7 @@ from planck_lite_py import PlanckLitePy
 import pyactlike
 import numpy as np
 import scipy.integrate as spi
+import scipy.special as sps
 import os
 
 # get ls, Dltt, Dlte, Dlee
@@ -125,10 +126,11 @@ def Pk_generator(theta):
 def get_sigma_r(k, Pk, r=8.):
     """Calculate sigma_r given matter power spectrum. r is in Mpc/h"""
     x = k * r
-    j1 = (np.sin(x) / x) - np.cos(x)
+    #j1 = (np.sin(x) / x) - np.cos(x)
+    j1 = sps.spherical_jn(1, x)
     Pk_dim = ((k ** 3.) * Pk) / (2. * (np.pi ** 2.))
-    integrand = ((3. * j1 / x) ** 2.) * (Pk_dim ** 2.)
-    variance = spi.trapezoid(integrand, x=np.log(k))
+    integrand = ((3. * j1 / x) ** 2.) * Pk_dim
+    variance = spi.simpson(integrand, x=np.log(k))
     sigma_r = np.sqrt(variance)
     print('Sigma_r =', sigma_r)
     return sigma_r
