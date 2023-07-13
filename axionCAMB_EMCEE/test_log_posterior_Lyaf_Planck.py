@@ -41,17 +41,17 @@ def log_posterior(x, parameters_and_priors):
     print('Parameters =', x)
 
     if log_prior_value == -np.inf:
-        return -np.inf, np.nan
+        return -np.inf, np.nan, np.nan, np.nan, -np.inf, -np.inf, log_prior_value
     else:
-        log_likelihood_value, sigma8 = log_likelihood_Lyaf(x)
-        if log_likelihood_value == -np.inf:
-            return -np.inf, sigma8
+        log_likelihood_value, sigma8, delta_l_2, n_l = log_likelihood_Lyaf(x)
+        #if log_likelihood_value == -np.inf:
+        #    return -np.inf, sigma8
+        #else:
+        log_likelihood_value_Planck = log_likelihood(x)
+        if log_likelihood_value_Planck == -np.inf:
+            return -np.inf, sigma8, delta_l_2, n_l, log_likelihood_value_Planck, log_likelihood_value, log_prior_value
         else:
-            log_likelihood_value_Planck = log_likelihood(x)
-            if log_likelihood_value_Planck == -np.inf:
-                return -np.inf, sigma8
-            else:
-                return log_prior_value + log_likelihood_value + log_likelihood_value_Planck, sigma8
+            return log_prior_value + log_likelihood_value_Planck, sigma8, delta_l_2, n_l, log_likelihood_value_Planck, log_likelihood_value, log_prior_value #log_likelihood_value +
 
 
 
@@ -93,12 +93,12 @@ import pickle
 with Pool(processes=60) as pool:
     # Set up the backend
     # Don't forget to clear it in case the file already exists
-    filename = "Lyaf_eBOSS_Planck_5_LCDM_2.h5"
+    filename = "Planck_1000_LCDM_2.h5"
     backend = emcee.backends.HDFBackend(filename)
     backend.reset(nwalkers, ndim)
     sampler = emcee.EnsembleSampler(nwalkers, ndim, log_posterior, args=[parameters_and_priors], pool=pool,backend=backend)
     start = time.time()
-    max_n = 5 #00
+    max_n = 1000
 
     index = 0
     autocorr = np.empty(max_n)
@@ -123,7 +123,7 @@ with Pool(processes=60) as pool:
     samples_sigma8_unflat = sampler.get_blobs()
     samples_sigma8_flat = sampler.get_blobs(flat=True)
 
-    data_pkl = 'Lyaf_eBOSS_Planck_axionCAMB_5_LCDM_2'+'.pkl'
+    data_pkl = 'Planck_axionCAMB_1000_LCDM_2'+'.pkl'
     print('Dump data and time to '+data_pkl+'...')
     f = open(data_pkl,'wb')
     pickle.dump(samples_unflat,f)
@@ -148,5 +148,5 @@ with Pool(processes=60) as pool:
     plt.ylim(0, y.max() + 0.1 * (y.max() - y.min()))
     plt.xlabel("number of steps")
     plt.ylabel(r"mean $\hat{\tau}$")
-    plt.savefig('convergence_test_Lyaf_eBOSS_Planck_5_LCDM_2.png')
+    plt.savefig('convergence_test_Planck_1000_LCDM_2.png')
 

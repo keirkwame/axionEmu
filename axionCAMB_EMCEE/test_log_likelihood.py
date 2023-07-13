@@ -236,7 +236,7 @@ def log_likelihood_Lyaf(theta_):
 
     results = Pk_generator(theta_extended)
     if results == -np.inf:
-        return -np.inf, np.nan
+        return -np.inf, np.nan, np.nan, np.nan
     else:
         k, Pk, sigma8 = results
         #C_tt = C_tt/(A_plank**2)
@@ -263,4 +263,4 @@ def log_likelihood_Lyaf(theta_):
 
         print('Log likelihood =', loglike)
         #TTTEEE2018_lowTTbins.loglike(C_tt, C_te, C_ee, int(l_index[0]))
-        return loglike, sigma8
+        return loglike, sigma8, delta_l_2, n_l
