@@ -232,7 +232,7 @@ def log_likelihood_Lyaf(theta_):
 
     #Add LCDM parameters
     #theta_extended = np.concatenate((np.array([0.022383, 0.12011 - theta_[1], 0.6732, 0.0543, 0.96605, 3.0448]), theta_))
-    theta_extended = theta_[:-1]
+    theta_extended = theta_[:-1] ##No A_Planck at the moment
 
     results = Pk_generator(theta_extended)
     if results == -np.inf:

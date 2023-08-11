@@ -25,5 +25,17 @@ notebooks/training_notebooks/.ipynb_checkpoints
 
 data_collection_axion/test_os_mp*
 data_collection_axion/test_os_HMcode*
+data_collection_axion/test_os_1*
+data_collection_axion/test_os_1*/
 data_collection_axion/test_os_9*
 data_collection_axion/*.pkl
+
+axionCAMB_EMCEE/*.h5
+axionCAMB_EMCEE/*.png
+axionCAMB_EMCEE/test_os_likelihood*
+axionCAMB_EMCEE/test_*_params.ini
+axionCAMB_EMCEE/test_*.dat
+
+*.npy
+*.pdf
+*.pkl

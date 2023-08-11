@@ -102,7 +102,7 @@ def do_non_linear_lensing(H0, omch2, ombh2, As, ns, m_ax, omaxh2, gamma_1, gamma
     cosmos['M_max'] = 18
     cosmos['k_piv'] = 0.05
     cosmos['z']     = 0.
-    cosmos['transfer_kmax'] = 20
+    cosmos['transfer_kmax'] = 1000 #1000
 
     cosmos['gamma_1'] = gamma_1
     cosmos['gamma_2'] = gamma_2
@@ -136,7 +136,7 @@ def do_non_linear_lensing(H0, omch2, ombh2, As, ns, m_ax, omaxh2, gamma_1, gamma
     PkL_list = []
     PkNL_list = []
     k_list = []
-    M_arr = np.logspace(8, 17, 100)
+    M_arr = np.logspace(7, 18, 100)
     
     for i in range(len(zs)):
         cosmos_specific_z = cosmos.copy()
@@ -170,10 +170,10 @@ def do_non_linear_lensing(H0, omch2, ombh2, As, ns, m_ax, omaxh2, gamma_1, gamma
                                                                        cosmos_specific_z, 
                                                                        hmcode_params, 
                                                                        axion_param, 
-                                                                       alpha = True, 
+                                                                       alpha = False, 
                                                                        eta_given = False, 
                                                                        one_halo_damping = True, 
-                                                                       two_halo_damping = True)
+                                                                       two_halo_damping = False)
             PkNL_list.append(PS_matter_nonlin[0])
     
     # Non-linear transfer function

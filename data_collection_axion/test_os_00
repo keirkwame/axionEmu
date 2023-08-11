@@ -143,8 +143,8 @@ CMB_outputscale = 7.4311e12
 #transfer_k_per_logint=5 samples fixed spacing in log-k
 #transfer_interp_matterpower =T produces matter power in regular interpolated grid in log k; 
 # use transfer_interp_matterpower =F to output calculated values (e.g. for later interpolation)
-transfer_high_precision = T
-transfer_kmax           = 10 #P_k_max_h/Mpc = 1.(CLASS)
+transfer_high_precision = F
+transfer_kmax           = 1000 #P_k_max_h/Mpc = 1.(CLASS)
 transfer_k_per_logint   = 0
 transfer_num_redshifts  = 2
 transfer_interp_matterpower = T
