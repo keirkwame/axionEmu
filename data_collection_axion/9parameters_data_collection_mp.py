@@ -198,17 +198,17 @@ def data_collection(input):
             ucls[:,1][2:] = C_ee
             ucls[:,3][2:] = C_te
             
-            #C_phi, PkNL, PkL, k_out, k_out2, z_out, weyl = do_non_linear_lensing(H_0, omega_cdm, omega_b, A_s, n_s, ma, omega_ax, gamma_1, gamma_2, z_lens, T_path)
+            C_phi, PkNL, PkL, k_out, z_out, weyl = do_non_linear_lensing(H_0, omega_cdm, omega_b, A_s, n_s, ma, omega_ax, gamma_1, gamma_2, z_lens, T_path)
             print('Finished calculating non-linear lensing')
             
             #lcls = correlations.lensed_cls(ucls, C_phi)
-            #C_tt, C_ee, C_bb, C_te = correlations.lensed_cls(ucls, C_phi).T
-            C_tt, C_ee, C_bb, C_te = ucls.T
+            C_tt, C_ee, C_bb, C_te = correlations.lensed_cls(ucls, C_phi).T
+            #C_tt, C_ee, C_bb, C_te = ucls.T
 
             #Non-linear matter power
-            matter_mg3, k_index3, k_index3b = do_non_linear_lensing(H_0, omega_cdm, omega_b, A_s, n_s, ma, omega_ax, gamma_1, gamma_2, np.array([z1,]), T_path+str(len(z_lens) + 1), return_matter_power=True)
-            matter_mg4, k_index4, k_index4b = do_non_linear_lensing(H_0, omega_cdm, omega_b, A_s, n_s, ma, omega_ax, gamma_1, gamma_2, np.array([z2,]), T_path+str(len(z_lens) + 2), return_matter_power=True)
-            print('Finished calculating non-linear matter power')
+            #matter_mg3, k_index3, k_index3b = do_non_linear_lensing(H_0, omega_cdm, omega_b, A_s, n_s, ma, omega_ax, gamma_1, gamma_2, np.array([z1,]), T_path+str(len(z_lens) + 1), return_matter_power=True)
+            #matter_mg4, k_index4, k_index4b = do_non_linear_lensing(H_0, omega_cdm, omega_b, A_s, n_s, ma, omega_ax, gamma_1, gamma_2, np.array([z2,]), T_path+str(len(z_lens) + 2), return_matter_power=True)
+            #print('Finished calculating non-linear matter power')
 
             ## CLEAN UP FILES ## 
             os.system('rm -r '+pre_name+'_'+'scalCls.dat')
@@ -229,22 +229,21 @@ def data_collection(input):
             collection_1['matter_mg'].append(matter_mg)
             collection_2['k_index'].append(k_index2)
             collection_2['matter_mg'].append(matter_mg2)
-            collection_3['k_index'].append(k_index3)
+            '''collection_3['k_index'].append(k_index3)
             collection_3['k_indexb'].append(k_index3b)
             collection_3['matter_mg'].append(matter_mg3)
             collection_4['k_index'].append(k_index4)
             collection_4['k_indexb'].append(k_index4b)
             collection_4['matter_mg'].append(matter_mg4)
-            #collection['C_phi'].append(C_phi[2:])
+            '''
+            collection['C_phi'].append(C_phi[2:])
 
             #Test arrays
-            '''collection['PkNL'].append(PkNL)
+            collection['PkNL'].append(PkNL)
             collection['PkL'].append(PkL)
             collection['k_out'].append(k_out)
-            collection['k_out2'].append(k_out2)
             collection['z_out'].append(z_out)
             collection['weyl'].append(weyl)
-            '''
 
             for key in params:
                 t_params[key].append(params[key][i])
@@ -323,10 +322,10 @@ if __name__ == '__main__':
     inputs_list = []
     number_cores = 60 #120 # number of cores you want to use in collecting data
     for i in range(number_cores):
-        pkl_name = 'LHD_parameters_180k_HMcode'+str(i)+'.pkl'
-        outputs_name = '12params_180k_HMcode2_' + str(i)
-        os_name = 'test_os_180k_HMcode2_' + str(i)
-        pre_name = 'test_180k_HMcode2_' + str(i) + '/test_180k_HMcode2_' + str(i) + '_'
+        pkl_name = 'LHD_parameters_test_NL_120k_HMcode'+str(i)+'.pkl'
+        outputs_name = 'test_NL_120k_' + str(i)
+        os_name = 'test_os_test_NL_120k_HMcode_' + str(i)
+        pre_name = 'test_NL_120k_HMcode_' + str(i) + '/test_NL_120k_HMcode_' + str(i) + '_'
         ele = (pkl_name, outputs_name, os_name, pre_name)
         inputs_list.append(ele)
     start_time = time()

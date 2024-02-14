@@ -17,7 +17,7 @@ from camb import correlations, model
 # Import axionHMCode
 import sys
 import os
-hmcode_path = '/home/r/rbond/alague/scratch/emulation/axionHMcode_fast/'
+hmcode_path = '/home/keir/Software/axionHMcode_fast/'
 sys.path.append(hmcode_path + 'axionCAMB_and_lin_PS/')
 sys.path.append(hmcode_path + 'cosmology/')
 sys.path.append(hmcode_path + 'axion_functions/')

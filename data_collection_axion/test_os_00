@@ -144,7 +144,7 @@ CMB_outputscale = 7.4311e12
 #transfer_interp_matterpower =T produces matter power in regular interpolated grid in log k; 
 # use transfer_interp_matterpower =F to output calculated values (e.g. for later interpolation)
 transfer_high_precision = F
-transfer_kmax           = 1000 #P_k_max_h/Mpc = 1.(CLASS)
+transfer_kmax           = 50 #P_k_max_h/Mpc = 1.(CLASS)
 transfer_k_per_logint   = 0
 transfer_num_redshifts  = 2
 transfer_interp_matterpower = T
@@ -226,7 +226,7 @@ number_of_threads       = 0
 #Note increasing accuracy_boost parameters is very inefficient if you want higher accuracy,
 #but high_accuracy_default is efficient 
 
-high_accuracy_default=T
+high_accuracy_default=F
 
 #Increase accuracy_boost to decrease time steps, use more k values,  etc.
 #Decrease to speed up at cost of worse accuracy. Suggest 0.8 to 3.
