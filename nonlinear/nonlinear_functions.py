@@ -228,7 +228,7 @@ def do_non_linear_lensing(H0, omch2, ombh2, As, ns, m_ax, omaxh2, gamma_1, gamma
 
     if not return_matter_power:
         # Create interpolator for Limber integral
-        P_weyl_NL = RectBivariateSpline(zs, power_spec_dic['k'], TkNL2 * weyl_Pk_lin)
+        P_weyl_NL = RectBivariateSpline(zs, power_spec_dic['k']*cosmos['h'], TkNL2 * weyl_Pk_lin/cosmos['h']**3) # changing to non-Hubble units
         
         # Perform Limber integral
         clkk_NL = get_limber_clkk_flat_universe(r, P_weyl_NL, 6300, cosmos['transfer_kmax'], 100, zsrc=None)
