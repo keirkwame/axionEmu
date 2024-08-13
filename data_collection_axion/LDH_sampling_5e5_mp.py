@@ -5,7 +5,7 @@ import pickle
 # number of parameters and samples
 
 n_params = 11
-n_samples = 120000 #180000 #150000
+n_samples = 199980 #180000 #150000
 
 # parameter ranges
 
@@ -17,7 +17,7 @@ As =      np.linspace(5.e-10, 2.6e-9, n_samples) #5e-10,    2.6e-9,    n_samples
 tau_reio = np.linspace(0.02, 0.12, n_samples) #0.02, 0.12,    n_samples)
 z = np.linspace(2.51,5.0, n_samples)
 #ma = np.linspace(-29.30103, -26.30103, n_samples)
-ma = np.linspace(-27., -23., n_samples) #np.array([-27., -26., -25., -24., -23.]) #np.concatenate((np.linspace(-28., -21., n_samples-1), np.array([-17.,]))) #-27, -23, n_samples)
+ma = np.linspace(-27., -21., n_samples) #np.array([-27., -26., -25., -24., -23.]) #np.concatenate((np.linspace(-28., -21., n_samples-1), np.array([-17.,]))) #-27, -23, n_samples)
 print(ma)
 sum_omega = np.linspace(0.09, 0.14, n_samples) #0.09, 0.14, n_samples) # sum of omaxh2 and omlambda in dark-energy region #sum of omaxh2 and omch2 in dark-matter region
 f_ax = np.linspace(0., 1., n_samples)
@@ -76,7 +76,7 @@ omega_ax = np.where(omega_ax > 0., omega_ax, np.ones(len(omega_ax)) * 1.e-32)
 params['omega_ax'] = omega_ax'''
 #params['omega_cdm'] = 0.12 - params['omega_ax']
 
-data_pkl = 'LHD_parameters_test_NL_120k_HMcode.pkl' #the .pkl that stores all input parameters
+data_pkl = 'LHD_parameters_NL_200k_HMcode_fixh2.pkl' #the .pkl that stores all input parameters
 f = open(data_pkl, 'wb')
 pickle.dump(params, f)
 f.close()
@@ -97,7 +97,7 @@ for i in range(num_subfile):
           'gamma_1': params['gamma_1'][start:start+num_samples_per_subfile],
           'gamma_2': params['gamma_2'][start:start+num_samples_per_subfile]
            }
-    data_pkl = 'LHD_parameters_test_NL_120k_HMcode' +str(i) +'.pkl'
+    data_pkl = 'LHD_parameters_NL_200k_HMcode_fixh2' +str(i) +'.pkl'
     f = open(data_pkl, 'wb')
     pickle.dump(params_1, f)
     f.close()

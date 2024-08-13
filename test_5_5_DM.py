@@ -36,7 +36,7 @@ for i in list_index:
     if i>-1:
         i = int(i)
         #f = open('/home/anran/axionCAMB/test_data_collect_mg1_9params_5e5_mp_test_'+str(i)+'.pkl', 'rb')
-        f = open('/home/keir/Software/axionEmu/data_collection_axion/test_data_collect_mg3_HMcode_NL_12params_180k_HMcode2_' +str(i)+'.pkl', 'rb')
+        f = open('/home/keir/Software/axionEmu/data_collection_axion/test_data_collect_mg3_HMcode_NL_NL_200k_fixh2_' +str(i)+'.pkl', 'rb')
         collection = pickle.load(f)
         f.close()
         collection_list.append(collection)
@@ -45,7 +45,7 @@ for i in list_index:
     if i>-1:
         i = int(i)
         #f = open('/home/anran/axionCAMB/test_data_collect_mg2_9params_5e5_mp_test_'+str(i)+'.pkl', 'rb')
-        f = open('/home/keir/Software/axionEmu/data_collection_axion/test_data_collect_mg4_HMcode_NL_12params_180k_HMcode2_' +str(i)+'.pkl', 'rb')
+        f = open('/home/keir/Software/axionEmu/data_collection_axion/test_data_collect_mg4_HMcode_NL_NL_200k_fixh2_' +str(i)+'.pkl', 'rb')
         collection = pickle.load(f)
         f.close()
         collection_list.append(collection)

@@ -322,10 +322,10 @@ if __name__ == '__main__':
     inputs_list = []
     number_cores = 60 #120 # number of cores you want to use in collecting data
     for i in range(number_cores):
-        pkl_name = 'LHD_parameters_test_NL_120k_HMcode'+str(i)+'.pkl'
-        outputs_name = 'test_NL_120k_' + str(i)
-        os_name = 'test_os_test_NL_120k_HMcode_' + str(i)
-        pre_name = 'test_NL_120k_HMcode_' + str(i) + '/test_NL_120k_HMcode_' + str(i) + '_'
+        pkl_name = 'LHD_parameters_NL_200k_HMcode_fixh2'+str(i)+'.pkl'
+        outputs_name = 'NL_200k_fixh2_' + str(i)
+        os_name = 'test_os_NL_200k_HMcode_fixh2_' + str(i)
+        pre_name = 'NL_200k_HMcode_fixh2_' + str(i) + '/NL_200k_HMcode_fixh2_' + str(i) + '_'
         ele = (pkl_name, outputs_name, os_name, pre_name)
         inputs_list.append(ele)
     start_time = time()
