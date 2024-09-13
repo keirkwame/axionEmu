@@ -36,7 +36,7 @@ for i in list_index:
     if i>-1:
         i = int(i)
         #f = open('/home/anran/axionCAMB/test_data_collect_mg1_9params_5e5_mp_test_'+str(i)+'.pkl', 'rb')
-        f = open('/home/keir/Software/axionEmu/data_collection_axion/test_data_collect_mg3_HMcode_NL_NL_200k_fixh2_' +str(i)+'.pkl', 'rb')
+        f = open('/home/keir/Software/axionEmu/data_collection_axion/test_data_collect_mg1_HMcode_NL_200k_fixh2_' +str(i)+'.pkl', 'rb')
         collection = pickle.load(f)
         f.close()
         collection_list.append(collection)
@@ -45,10 +45,12 @@ for i in list_index:
     if i>-1:
         i = int(i)
         #f = open('/home/anran/axionCAMB/test_data_collect_mg2_9params_5e5_mp_test_'+str(i)+'.pkl', 'rb')
-        f = open('/home/keir/Software/axionEmu/data_collection_axion/test_data_collect_mg4_HMcode_NL_NL_200k_fixh2_' +str(i)+'.pkl', 'rb')
+        f = open('/home/keir/Software/axionEmu/data_collection_axion/test_data_collect_mg2_HMcode_NL_200k_fixh2_' +str(i)+'.pkl', 'rb')
         collection = pickle.load(f)
         f.close()
         collection_list.append(collection)
+
+print(len(collection_list), collection_list[0].keys())
 
 print("Open CDM (Pk) file")
 f_ = open("./test_data_collect_mg_cdm.pkl", 'rb')
@@ -73,6 +75,8 @@ for i in range(len(collection_list)):
     mg_list.extend(collection_list[i]['matter_mg'])
     for key in para:
       parameters_list[key] = np.concatenate((parameters_list[key], para[key]))
+
+#print(mg_list)
 
 '''for i in range(len(mg_list)):
     mg_list[i] = mg_list[i][:244]
@@ -176,7 +180,7 @@ def growth_factor_D(z):
 from cosmopower import cosmopower_NN
 
 #Train new emulators
-'''cp_nn = cosmopower_NN(parameters=model_parameters,
+cp_nn = cosmopower_NN(parameters=model_parameters,
                       modes=k_new, #k_index_list[0],
                       n_hidden = [64, 512, 512, 512, 512], # 4 hidden layers, each with 512 nodes
                       verbose=True, # useful to understand the different steps in initialisation and training
@@ -188,7 +192,7 @@ with tf.device('/device:GPU:0'): # ensures we are running on a GPU
     # train
     cp_nn.train(training_parameters=training_parameters,
                 training_features=training__spectra,
-                filename_saved_model='Pk_cp_NN_NL_t1',
+                filename_saved_model='Pk_cp_NN_NL_t2',
                 # cooling schedule
                 validation_split=0.1,
                 learning_rates=[1e-2, 1e-3, 1e-4, 1e-5, 1e-6, 1e-6],
@@ -198,10 +202,9 @@ with tf.device('/device:GPU:0'): # ensures we are running on a GPU
                 patience_values = [200,200,200,200,200,200],
                 max_epochs = [1000,1000,1000,1000,1000, 1000],
                 )
-'''
 
 cp_nn = cosmopower_NN(restore=True,
-                      restore_filename='Pk_cp_NN_NL_t1',
+                      restore_filename='Pk_cp_NN_NL_t2',
                       )
 testing_spectra_ex = []
 testing_parameters_ex = dict()
@@ -261,7 +264,7 @@ ax.yaxis.set_major_locator(plt.MaxNLocator(5))
 plt.setp(ax.get_xticklabels(), fontsize=20)
 plt.setp(ax.get_yticklabels(), fontsize=20)
 plt.tight_layout()
-plt.savefig('./accuracy_emu_Pk_NL_notrain_ax0.07_exclude_1pc.pdf')
+plt.savefig('./accuracy_emu_Pk_NL_notrain_ax0.07_exclude_1pc_t2.pdf')
 
 plt.figure(figsize=(12, 9))
 z_plot = np.linspace(0., 5., num=100)
@@ -269,4 +272,4 @@ growth_ratio = np.array([growth_factor_D(z) for z in z_plot])
 plt.plot(z_plot, growth_ratio * (1. + z_plot) / growth_factor_D(0.))
 plt.xlabel(r'$z$')
 plt.ylabel(r'$D(z) / a(z) / D(z = 0)$')
-plt.savefig('./D_z_norm.pdf')
+plt.savefig('./D_z_norm_t2.pdf')
