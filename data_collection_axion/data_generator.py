@@ -368,12 +368,12 @@ def data_collection(input):
 
 if __name__ == '__main__':
     inputs_list = []
-    number_cores = 5 # number of cores you want to use in collecting data
+    number_cores = 2 # number of cores you want to use in collecting data
     for i in range(number_cores):
-        pkl_name = '/home/keir/keir/LH_ACT_DR6_TTTEEEPP_nu_'+str(i)+'.pkl'
-        outputs_name = 'LH_ACT_DR6_TTTEEEPP_nu_' + str(i)
-        os_name = '/home/keir/keir/LH_ACT_DR6_TTTEEEPP_nu_inifile_' + str(i)
-        pre_name = '/home/keir/keir/LH_ACT_DR6_TTTEEEPP_nu_' + str(i) + '/LH_ACT_DR6_TTTEEEPP_nu_' + str(i) + '_'
+        pkl_name = '/home/keir/keir/LH_ACT_DR6_TTTEEEPP_nu2_'+str(i)+'.pkl'
+        outputs_name = 'LH_ACT_DR6_TTTEEEPP_nu2_' + str(i)
+        os_name = '/home/keir/keir/LH_ACT_DR6_TTTEEEPP_nu2_inifile_' + str(i)
+        pre_name = '/home/keir/keir/LH_ACT_DR6_TTTEEEPP_nu2_' + str(i) + '/LH_ACT_DR6_TTTEEEPP_nu2_' + str(i) + '_'
         ele = (pkl_name, outputs_name, os_name, pre_name)
         inputs_list.append(ele)
     start_time = time()

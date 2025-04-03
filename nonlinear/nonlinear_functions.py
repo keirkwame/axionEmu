@@ -8,7 +8,7 @@
 
 # Regular imports
 import numpy as np
-from scipy.interpolate import interp1d, RectBivariateSpline
+from scipy.interpolate import interp1d, RectBivariateSpline, CubicSpline
 
 # Camb import
 import camb
@@ -64,6 +64,55 @@ def get_limber_clkk_flat_universe(results, interp_pk, lmax, kmax, nz, zsrc=None)
         cl_kappa[i+2] = np.dot(dchis, w*interp_pk(zs, k, grid=False)*win/k**4)
     cl_kappa*= (ls*(ls+1))**2
     return cl_kappa
+
+
+def neutrino_nonlin_correction(k_array, cosmo_dic):
+
+    kmax = cosmo_dic['transfer_kmax']
+
+
+    ## NO NEUTRINOS ##
+    pars =  camb.set_params(H0=100*cosmo_dic['h'], ombh2=cosmo_dic['omega_b_0'],
+                        omch2=cosmo_dic['omega_d_0'], ns=cosmo_dic['ns'],
+                        mnu=0.0, omk=0,
+                       As=cosmo_dic['As'], halofit_version='mead2020', lmax=3000, tau = 0.06)
+
+
+    pars.set_matter_power(redshifts=[cosmo_dic['z']], kmax=kmax)
+
+    pars.NonLinear = model.NonLinear_none
+    results = camb.get_results(pars)
+    kh, z, pk_nonu = results.get_matter_power_spectrum(minkh=1e-4, maxkh=kmax, npoints = 400)
+
+
+    pars.NonLinear = model.NonLinear_both
+    results.calc_power_spectra(pars)
+    kh_nonlin, z_nonlin, pk_nonlin_nonu = results.get_matter_power_spectrum(minkh=1e-4, maxkh=kmax, npoints = 400)
+
+
+    ## WITH NEUTRINOS ##
+    pars =  camb.set_params(H0=100*cosmo_dic['h'], ombh2=cosmo_dic['omega_b_0'],
+                        omch2=cosmo_dic['omega_d_0'], ns=cosmo_dic['ns'],
+                        mnu=0.06, omk=0,
+                       As=cosmo_dic['As'], halofit_version='mead2016', lmax=3000, tau = 0.06)
+
+    pars.set_matter_power(redshifts=[cosmo_dic['z']], kmax=kmax)
+
+    pars.NonLinear = model.NonLinear_none
+    results = camb.get_results(pars)
+    kh, z, pk = results.get_matter_power_spectrum(minkh=1e-4, maxkh=kmax, npoints = 400)
+
+    pars.NonLinear = model.NonLinear_both
+    pars.NonLinearModel.set_params('mead2016', HMCode_A_baryon = 3.13, HMCode_eta_baryon = 0.603)
+    results.calc_power_spectra(pars)
+    kh_nonlin, z_nonlin, pk_nonlin = results.get_matter_power_spectrum(minkh=1e-4, maxkh=kmax, npoints = 400)
+
+    ## CORRECTION ##
+    C = (pk_nonlin[0] / pk_nonlin_nonu[0]) / (pk[0] / pk_nonu[0])
+
+    interpolated_C = CubicSpline(kh, C)(k_array)
+
+    return interpolated_C
 
 
 def do_non_linear_lensing(H0, omch2, ombh2, As, ns, m_ax, omaxh2, gamma_1, gamma_2, zs, T_path, return_matter_power=False):
@@ -192,7 +241,7 @@ def do_non_linear_lensing(H0, omch2, ombh2, As, ns, m_ax, omaxh2, gamma_1, gamma
                                                            power_spec_dic['k'],
                                                            power_spec_dic['power_cold'])
             print('Calculated hmcode_params')
-            axion_param = axion_params.func_axion_param_dic(M_arr, cosmos_specific_z, power_spec_dic, eta_given=False) #interp
+            axion_param = axion_params.func_axion_param_dic(M_arr, cosmos_specific_z, power_spec_dic, hmcode_params, concentration_param=True) #eta_given=False) #interp
             print('Calculated axion_param')
             PS_matter_nonlin = PS_nonlin_axion.func_full_halo_model_ax(M_arr, 
                                                                        power_spec_dic, 
@@ -203,10 +252,14 @@ def do_non_linear_lensing(H0, omch2, ombh2, As, ns, m_ax, omaxh2, gamma_1, gamma
                                                                        eta_given = True, 
                                                                        one_halo_damping = True, 
                                                                        two_halo_damping = True,
+                                                                       concentration_param=True,
                                                                        full_2h = False)
             #print('PS_matter_nonlin =', PS_matter_nonlin)
             print('Calculated PS_matter_nonlin')
-            PkNL_list.append(PS_matter_nonlin[0])
+            nu_nl_corr = neutrino_nonlin_correction(power_spec_dic['k'], cosmos_specific_z)
+            #PS_matter_nonlin[0] *= nu_nl_corr
+            ps_m_n = PS_matter_nonlin[0] * nu_nl_corr
+            PkNL_list.append(ps_m_n)
     
     # Non-linear transfer function
     PkL_list = np.array(PkL_list[::-1]) #Increasing redshift

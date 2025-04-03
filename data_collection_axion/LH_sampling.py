@@ -4,17 +4,17 @@ import pickle
 
 # number of parameters and samples
 n_params = 11
-n_samples = 5 #199920 #Number of training samples -- this should be a multiple of num_subfile below because this code will distribute the axionCAMB runs across the CPUs that are available
+n_samples = 2 #199920 #Number of training samples -- this should be a multiple of num_subfile below because this code will distribute the axionCAMB runs across the CPUs that are available
 
 # parameter ranges
-obh2 =      np.linspace(0.02, 0.024, n_samples) #0.017, 0.027, n_samples) #0.019, 0.026, n_samples)
-H_0 =         np.linspace(61., 80., n_samples) #55.0,    82.0,    n_samples) 
-ns =        np.linspace(0.9, 1., n_samples) #0.9, 1.1 #0.86, 1.07,    n_samples)
-As =      np.linspace(1.9e-9, 2.4e-9, n_samples) #1.3e-9, 2.8e-9 #5e-10,    2.6e-9,    n_samples)
-tau_reio = np.linspace(0.04, 0.07, n_samples) #0.01, 0.1 #0.02, 0.12,    n_samples)
+obh2 =      np.linspace(0.022, 0.022, n_samples) #0.017, 0.027, n_samples) #0.019, 0.026, n_samples)
+H_0 =         np.linspace(70., 70., n_samples) #55.0,    82.0,    n_samples) 
+ns =        np.linspace(0.96, 0.96, n_samples) #0.9, 1.1 #0.86, 1.07,    n_samples)
+As =      np.linspace(2.1e-9, 2.1e-9, n_samples) #1.3e-9, 2.8e-9 #5e-10,    2.6e-9,    n_samples)
+tau_reio = np.linspace(0.06, 0.06, n_samples) #0.01, 0.1 #0.02, 0.12,    n_samples)
 z = np.linspace(2.51,5.0, n_samples) #For the given range of z here, you will end up with another set of samples mirrored around the minimum value, i.e. from 0 to 2.5
 ma = np.linspace(-27., -22., n_samples) #np.array([-27., -26., -25., -24., -23.]) #np.concatenate((np.linspace(-28., -21., n_samples-1), np.array([-17.,]))) #-27, -23, n_samples)
-sum_omega = np.linspace(0.1, 0.14, n_samples) #0.09, 0.15, n_samples) # sum of omaxh2 and omlambda in dark-energy region #sum of omaxh2 and omch2 in dark-matter region
+sum_omega = np.linspace(0.12, 0.12, n_samples) #0.09, 0.15, n_samples) # sum of omaxh2 and omlambda in dark-energy region #sum of omaxh2 and omch2 in dark-matter region
 #0.124, 0.565
 f_ax = np.linspace(1.e-10, 1.e-10, n_samples) #1
 #These are experimental halo model parameters -- leave them fixed to zero
@@ -46,11 +46,11 @@ params = {'omega_b': AllCombinations[:, 0],
 
 print(params)
 
-data_pkl = '/home/keir/keir/LH_ACT_DR6_TTTEEEPP_nu.pkl' #the .pkl that stores all input parameters
+data_pkl = '/home/keir/keir/LH_ACT_DR6_TTTEEEPP_nu2.pkl' #the .pkl that stores all input parameters
 f = open(data_pkl, 'wb')
 pickle.dump(params, f)
 f.close()
-num_subfile = 5 # this number should be in consistent with number_cores variable in the 9parameters_data_collection_mp.py file
+num_subfile = 2 # this number should be in consistent with number_cores variable in the 9parameters_data_collection_mp.py file
 num_samples_per_subfile = int(n_samples/num_subfile)
 for i in range(num_subfile):
     start = int(i*num_samples_per_subfile)
@@ -67,7 +67,7 @@ for i in range(num_subfile):
           'gamma_1': params['gamma_1'][start:start+num_samples_per_subfile],
           'gamma_2': params['gamma_2'][start:start+num_samples_per_subfile]
            }
-    data_pkl = '/home/keir/keir/LH_ACT_DR6_TTTEEEPP_nu_' +str(i) +'.pkl'
+    data_pkl = '/home/keir/keir/LH_ACT_DR6_TTTEEEPP_nu2_' +str(i) +'.pkl'
     f = open(data_pkl, 'wb')
     pickle.dump(params_1, f)
     f.close()
