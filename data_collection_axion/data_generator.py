@@ -1,6 +1,7 @@
 # In[ ]:
 
 import os
+import copy as cp
 import numpy as np
 import pickle
 import copy
@@ -82,7 +83,9 @@ def data_collection(input):
     deriv_params=dict() # rh added derived params
     
     # AL add z_lens generated from comoving distance
-    z_lens = np.loadtxt('../nonlinear/optimal_z_array.dat')
+    z_lens = cp.deepcopy(np.loadtxt('../nonlinear/optimal_z_array.dat'))
+    z_lens = np.concatenate((z_lens[z_lens <= 4.][::2], z_lens[z_lens > 4.][::4]))
+    print('z_lens =', z_lens)
 
     for key in params:
         t_params[key] = []
@@ -195,8 +198,8 @@ def data_collection(input):
             f2.close()
 
             ## RUN CAMB ##
-            os.system('/home/keir/Software/axionCAMB/camb_AL_240225 '+params_ini_file + '_copy') #/home/keir/Software/axionCAMB/camb
-            print('Finished running CAMB')
+            os.system('/home/keir/Software/AxiECAMB/camb '+params_ini_file + '_copy') #/home/keir/Software/axionCAMB/camb #/home/keir/Software/axionCAMB/camb_AL_240225
+            print('Finished running CAMB after', time() - start, 'seconds')
             
             ## COLLECT DATA ##
             unlensed_cls =  np.loadtxt(pre_name+'_'+'scalCls.dat')
@@ -368,12 +371,12 @@ def data_collection(input):
 
 if __name__ == '__main__':
     inputs_list = []
-    number_cores = 2 # number of cores you want to use in collecting data
+    number_cores = 60 # number of cores you want to use in collecting data
     for i in range(number_cores):
-        pkl_name = '/home/keir/keir/LH_ACT_DR6_TTTEEEPP_nu2_'+str(i)+'.pkl'
-        outputs_name = 'LH_ACT_DR6_TTTEEEPP_nu2_' + str(i)
-        os_name = '/home/keir/keir/LH_ACT_DR6_TTTEEEPP_nu2_inifile_' + str(i)
-        pre_name = '/home/keir/keir/LH_ACT_DR6_TTTEEEPP_nu2_' + str(i) + '/LH_ACT_DR6_TTTEEEPP_nu2_' + str(i) + '_'
+        pkl_name = '/home/keir/keir/LH_ACT_DR6_TTTEEEPP_vary_cosmo_test_wide_'+str(i)+'.pkl'
+        outputs_name = 'LH_ACT_DR6_TTTEEEPP_vary_cosmo_test_wide_' + str(i)
+        os_name = '/home/keir/keir/LH_ACT_DR6_TTTEEEPP_vary_cosmo_test_wide_inifile_' + str(i)
+        pre_name = '/home/keir/keir/LH_ACT_DR6_TTTEEEPP_vary_cosmo_test_wide_' + str(i) + '/LH_ACT_DR6_TTTEEEPP_vary_cosmo_test_wide_' + str(i) + '_'
         ele = (pkl_name, outputs_name, os_name, pre_name)
         inputs_list.append(ele)
     start_time = time()
