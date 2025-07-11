@@ -78,6 +78,11 @@ def data_collection(input):
     collection_deriv['z_drag']=[]
     collection_deriv['100*theta_d']=[]
 
+    collection_deriv['zBAO']=[]
+    collection_deriv['HBAO']=[]
+    collection_deriv['DABAO']=[]
+    collection_deriv['rsBAO']=[]
+
     t_params = dict()
     t_params1 = dict()
     t_params2 = dict()
@@ -246,6 +251,12 @@ def data_collection(input):
             collection_deriv['kd_star'].append(float(dlines[20].split()[3]))
             collection_deriv['z_drag'].append(float(dlines[18].split()[2]))
             collection_deriv['100*theta_d'].append(float(dlines[21].split()[2]))
+            
+            baos = np.loadtxt(pre_name+'_deriv_params_BAO', skiprows=1)
+            collection_deriv['zBAO']=baos[:,0]
+            collection_deriv['HBAO']=baos[:,1]
+            collection_deriv['DABAO']=baos[:,2]
+            collection_deriv['rsBAO']=baos[:,3]
 
             os.system('rm ' + params_ini_file + '_copy')
             os.system('rm -r '+pre_name+'_'+'params.ini')
@@ -400,11 +411,11 @@ if __name__ == '__main__':
         ele = (pkl_name, outputs_name, os_name, pre_name)
         inputs_list.append(ele)
     start_time = time()
-    p = Pool(number_cores)
-    p.map(data_collection,inputs_list)
-    #data_collection(('/home/renee/axionEmuDat/LHD_parameters_NL_200k_HMcode_fixh2_0.pkl','LHD_parameters_NL_200k_HMcode_fixh2_0','test_osr_0','test_0_'))
-    p.close()
-    p.join()
+    #p = Pool(number_cores)
+    #p.map(data_collection,inputs_list)
+    data_collection(('/home/renee/axionEmuDat/LHD_parameters_NL_200k_HMcode_fixh2_0.pkl','LHD_parameters_NL_200k_HMcode_fixh2_0','test_osr_0','test_0_'))
+    #p.close()
+    #p.join()
     end_time = time()
     print(end_time-start_time)
 
