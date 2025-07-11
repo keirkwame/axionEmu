@@ -1,4 +1,3 @@
-# In[ ]:
 
 import os
 import copy as cp
@@ -74,6 +73,10 @@ def data_collection(input):
     collection_deriv['rs_star']=[]
     collection_deriv['ra_star']=[]
     collection_deriv['rs_drag']=[]
+    collection_deriv['age']=[]
+    collection_deriv['kd_star']=[]
+    collection_deriv['z_drag']=[]
+    collection_deriv['100*theta_d']=[]
 
     t_params = dict()
     t_params1 = dict()
@@ -130,15 +133,21 @@ def data_collection(input):
             lines = f1.readlines()
             f1.close()
             print('Opened and closed params.ini')
+
+            # for l,line in enumerate(lines):
+            #     print(l, line)
+
+            # print('************')
+
             lines[3] = 'output_root = ' + pre_name + '\n'
             lines[36] = 'ombh2 = '+str(omega_b)+'\n' #-2 for all below # rh added derived params
             lines[37] = 'omch2 = '+str(omega_cdm)+'\n'
             lines[40] = 'hubble         = '+str(H_0)+'\n'
-            lines[93] = 'scalar_amp(1)             = '+str(A_s)+'\n'
-            lines[94] = 'scalar_spectral_index(1)  = '+str(n_s)+'\n'
-            lines[108] = 're_optical_depth     = '+str(tau_reio)+'\n'
-            lines[56] = 'omaxh2 = '+str(omega_ax)+'\n'
-            lines[57] = 'm_ax = '+str(ma)+'\n'
+            lines[96] = 'scalar_amp(1)             = '+str(A_s)+'\n'
+            lines[97] = 'scalar_spectral_index(1)  = '+str(n_s)+'\n'
+            lines[111] = 're_optical_depth     = '+str(tau_reio)+'\n'
+            lines[54] = 'omaxh2 = '+str(omega_ax)+'\n'
+            lines[50] = 'm_ax = '+str(ma)+'\n'
 
             ##Find redshift index for z1 and z2
             '''z_combined = np.concatenate((z_lens[::-1], np.array([z1, z2])))
@@ -163,22 +172,21 @@ def data_collection(input):
             z_ordered = z_combined[z_combined_indices]
             #print('Re-ordered and combined redshifts', z_combined_indices, z_ordered)
 
-            lines[150] = 'transfer_num_redshifts  = '+str(len(z_lens) + 2)+'\n'
+            lines[156] = 'transfer_num_redshifts  = '+str(len(z_lens) + 2)+'\n'
             #lines[150] = 'transfer_redshift('+ str(z1_idx) +')    = '+str(z1)+'\n'
             #lines[152] = 'transfer_redshift('+ str(z2_idx) +')    = '+str(z2)+'\n'
-            lines[152] = '\n'
-            lines[153] = '\n'
             '''lines[151] = 'transfer_filename('+ str(z1_idx) +')    = transfer_'+str(len(z_lens) + 1)+'.dat\n'
             lines[153] = 'transfer_filename('+ str(z2_idx) +')    = transfer_'+str(len(z_lens) + 2)+'.dat\n'
             lines[155] = 'transfer_matterpower('+ str(z1_idx) +')    = matterpower_'+str(len(z_lens) + 1)+'.dat\n'
             lines[156] = 'transfer_matterpower('+ str(z2_idx) +')    = matterpower_'+str(len(z_lens) + 2)+'.dat\n'
             '''
-            lines[154] = '\n'
-            lines[155] = '\n'
-            lines[156] = '\n'
-            lines[157] = '\n'
             lines[158] = '\n'
             lines[159] = '\n'
+            lines[160] = '\n'
+            lines[161] = '\n'
+            lines[162] = '\n'
+            lines[163] = '\n'
+            lines[164] = '\n'
             
             #if 'transfer_redshift(3)    = '+str(z_lens[::-1][2])+'\n' in lines: # make sure it's not already there
             #    print('Already done transfer list')
@@ -196,9 +204,10 @@ def data_collection(input):
             f2 = open(params_ini_file + '_copy', 'w')
             f2.writelines(lines)
             f2.close()
+            
 
             ## RUN CAMB ##
-            os.system('/home/keir/Software/AxiECAMB/camb '+params_ini_file + '_copy') #/home/keir/Software/axionCAMB/camb #/home/keir/Software/axionCAMB/camb_AL_240225
+            os.system('/home/renee/AxiECAMB/camb '+params_ini_file + '_copy') 
             print('Finished running CAMB after', time() - start, 'seconds')
             
             ## COLLECT DATA ##
@@ -209,24 +218,34 @@ def data_collection(input):
 
             ## NEED TO INSERT READING THE PARAMS OUTFILE HERE # rh added derived params
             # print(pre_name+'_deriv_params', '*****')
-            '''df=open(pre_name+'_deriv_params')
+            df=open(pre_name+'_deriv_params')
             dlines=df.readlines()
             df.close()
 
-            collection_deriv['100*theta_s'].append(float(dlines[2].split()[2]))
-            collection_deriv['sigma8'].append(float(dlines[14].split()[2]))
-            collection_deriv['YHe'].append(float(dlines[3].split()[2]))
+            # for l, line in enumerate(dlines):
+            #     print(line.split(), l)
+            # print('------')
+            # for key in collection_deriv:
+            #     print(key)
+
+            collection_deriv['100*theta_s'].append(float(dlines[17].split()[2]))
+            collection_deriv['sigma8'].append(float(dlines[2].split()[2]))
+            collection_deriv['YHe'].append(float(dlines[6].split()[2]))
             collection_deriv['z_reio'].append(float(dlines[0].split()[2]))
             collection_deriv['Neff'].append(float(dlines[1].split()[2]))
             collection_deriv['tau_rec'].append(float(dlines[4].split()[2]))
             collection_deriv['z_rec'].append(float(dlines[5].split()[2]))
-            collection_deriv['rs_rec'].append(float(dlines[6].split()[2]))
-            collection_deriv['ra_rec'].append(float(dlines[7].split()[2]))
-            collection_deriv['tau_star'].append(float(dlines[8].split()[2]))
-            collection_deriv['z_star'].append(float(dlines[9].split()[2]))
-            collection_deriv['rs_star'].append(float(dlines[10].split()[2]))
-            collection_deriv['ra_star'].append(float(dlines[11].split()[2]))
-            collection_deriv['rs_drag'].append(float(dlines[12].split()[2]))'''
+            collection_deriv['rs_rec'].append(float(dlines[7].split()[2]))
+            collection_deriv['ra_rec'].append(float(dlines[8].split()[2]))
+            collection_deriv['tau_star'].append(float(dlines[9].split()[2]))
+            collection_deriv['z_star'].append(float(dlines[10].split()[2]))
+            collection_deriv['rs_star'].append(float(dlines[11].split()[2]))
+            collection_deriv['ra_star'].append(float(dlines[12].split()[2]))
+            collection_deriv['rs_drag'].append(float(dlines[13].split()[2]))
+            collection_deriv['age'].append(float(dlines[14].split()[4]))
+            collection_deriv['kd_star'].append(float(dlines[20].split()[3]))
+            collection_deriv['z_drag'].append(float(dlines[18].split()[2]))
+            collection_deriv['100*theta_d'].append(float(dlines[21].split()[2]))
 
             os.system('rm ' + params_ini_file + '_copy')
             os.system('rm -r '+pre_name+'_'+'params.ini')
@@ -330,36 +349,36 @@ def data_collection(input):
     ## set up index of .pkl file ##
     index_pkl = str(index_pkl_name)
     ## Finish setting up ##
-    data_pkl = '/home/keir/keir/data_C_ell_'+index_pkl+'.pkl'
+    data_pkl = '/home/renee/axionEmuDat/data_C_ell_'+index_pkl+'.pkl'
     print('Dump data to '+data_pkl+'...')
     f = open(data_pkl,'wb')
     pickle.dump(collection,f)
     f.close()
-    data_pkl = '/home/keir/keir/data_P_k_linear_1_'+index_pkl+'.pkl'
+    data_pkl = '/home/renee/axionEmuDat/data_P_k_linear_1_'+index_pkl+'.pkl'
     print('Dump data to '+data_pkl+'...')
     f = open(data_pkl,'wb')
     pickle.dump(collection_1,f)
     f.close()
-    data_pkl = '/home/keir/keir/data_P_k_linear_2_'+index_pkl+'.pkl'
+    data_pkl = '/home/renee/axionEmuDat/data_P_k_linear_2_'+index_pkl+'.pkl'
     print('Dump data to '+data_pkl+'...')
     f = open(data_pkl,'wb')
     pickle.dump(collection_2,f)
     f.close()
 
     # rh added derived params
-    '''data_pkl = '/home/keir/keir/data_derivedparams_'+index_pkl+'.pkl'
+    data_pkl = '/home/renee/axionEmuDat/data_derivedparams_'+index_pkl+'.pkl'
     print('Dump data to '+data_pkl+'...')
     f = open(data_pkl,'wb')
     pickle.dump(collection_deriv,f)
-    f.close()'''
+    f.close()
 
-    data_pkl = '/home/keir/keir/data_P_k_nonlinear_1_'+index_pkl+'.pkl'
+    data_pkl = '/home/renee/axionEmuDat/data_P_k_nonlinear_1_'+index_pkl+'.pkl'
     print('Dump data to '+data_pkl+'...')
     f = open(data_pkl,'wb')
     pickle.dump(collection_3,f)
     f.close()
 
-    data_pkl = '/home/keir/keir/data_P_k_nonlinear_2_'+index_pkl+'.pkl'
+    data_pkl = '/home/renee/axionEmuDat/data_P_k_nonlinear_2_'+index_pkl+'.pkl'
     print('Dump data to '+data_pkl+'...')
     f = open(data_pkl,'wb')
     pickle.dump(collection_4,f)
@@ -372,17 +391,18 @@ def data_collection(input):
 if __name__ == '__main__':
     inputs_list = []
     number_cores = 60 # number of cores you want to use in collecting data
+    root  = 'LHD_parameters_NL_200k_HMcode_fixh2_'
     for i in range(number_cores):
-        pkl_name = '/home/keir/keir/LH_ACT_DR6_TTTEEEPP_vary_cosmo_test_wide_'+str(i)+'.pkl'
-        outputs_name = 'LH_ACT_DR6_TTTEEEPP_vary_cosmo_test_wide_' + str(i)
-        os_name = '/home/keir/keir/LH_ACT_DR6_TTTEEEPP_vary_cosmo_test_wide_inifile_' + str(i)
-        pre_name = '/home/keir/keir/LH_ACT_DR6_TTTEEEPP_vary_cosmo_test_wide_' + str(i) + '/LH_ACT_DR6_TTTEEEPP_vary_cosmo_test_wide_' + str(i) + '_'
+        pkl_name = '/home/renee/axionEmuDat/'+root+str(i)+'.pkl'
+        outputs_name = root + str(i)
+        os_name = '/home/renee/axionEmuDat/'+root + str(i)
+        pre_name = '/home/renee/axionEmuDat/'+root + str(i) + '/'+root + str(i) + '_'
         ele = (pkl_name, outputs_name, os_name, pre_name)
         inputs_list.append(ele)
     start_time = time()
     p = Pool(number_cores)
     p.map(data_collection,inputs_list)
-   # data_collection(('LHD_parameters_2e5_0.pkl','9params_0','test_os_0','test_0_'))
+    #data_collection(('/home/renee/axionEmuDat/LHD_parameters_NL_200k_HMcode_fixh2_0.pkl','LHD_parameters_NL_200k_HMcode_fixh2_0','test_osr_0','test_0_'))
     p.close()
     p.join()
     end_time = time()
