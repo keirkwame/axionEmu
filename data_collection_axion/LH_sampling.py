@@ -4,7 +4,7 @@ import pickle
 
 # number of parameters and samples
 n_params = 11
-n_samples = 120 #199920 #Number of training samples -- this should be a multiple of num_subfile below because this code will distribute the axionCAMB runs across the CPUs that are available
+n_samples = 10 #199920 #Number of training samples -- this should be a multiple of num_subfile below because this code will distribute the axionCAMB runs across the CPUs that are available
 
 # parameter ranges
 obh2 =      np.linspace(0.01933, 0.02533, n_samples) #0.0222, 0.0229, n_samples) #0.017, 0.027, n_samples) #0.019, 0.026, n_samples)
@@ -46,11 +46,11 @@ params = {'omega_b': AllCombinations[:, 0],
 
 print(params)
 
-data_pkl = '/home/keir/keir/LH_ACT_DR6_TTTEEEPP_vary_cosmo_test_wide.pkl' #the .pkl that stores all input parameters
+data_pkl = '/home/keir/keir/LH_ACT_DR6_TTTEEEPP_vary_cosmo_test_wide_derived.pkl' #the .pkl that stores all input parameters
 f = open(data_pkl, 'wb')
 pickle.dump(params, f)
 f.close()
-num_subfile = 60 # this number should be in consistent with number_cores variable in the 9parameters_data_collection_mp.py file
+num_subfile = 10 # this number should be in consistent with number_cores variable in the 9parameters_data_collection_mp.py file
 num_samples_per_subfile = int(n_samples/num_subfile)
 for i in range(num_subfile):
     start = int(i*num_samples_per_subfile)
@@ -67,7 +67,7 @@ for i in range(num_subfile):
           'gamma_1': params['gamma_1'][start:start+num_samples_per_subfile],
           'gamma_2': params['gamma_2'][start:start+num_samples_per_subfile]
            }
-    data_pkl = '/home/keir/keir/LH_ACT_DR6_TTTEEEPP_vary_cosmo_test_wide_' +str(i) +'.pkl'
+    data_pkl = '/home/keir/keir/LH_ACT_DR6_TTTEEEPP_vary_cosmo_test_wide_derived_' +str(i) +'.pkl'
     f = open(data_pkl, 'wb')
     pickle.dump(params_1, f)
     f.close()

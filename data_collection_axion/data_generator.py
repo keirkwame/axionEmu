@@ -192,6 +192,8 @@ def data_collection(input):
             lines[162] = '\n'
             lines[163] = '\n'
             lines[164] = '\n'
+            lines[165] = '\n'
+            lines[166] = '\n'
             
             #if 'transfer_redshift(3)    = '+str(z_lens[::-1][2])+'\n' in lines: # make sure it's not already there
             #    print('Already done transfer list')
@@ -212,7 +214,7 @@ def data_collection(input):
             
 
             ## RUN CAMB ##
-            os.system('/home/renee/AxiECAMB/camb '+params_ini_file + '_copy') 
+            os.system('/home/keir/Software/axionEmu/data_collection_axion/camb '+params_ini_file + '_copy') 
             print('Finished running CAMB after', time() - start, 'seconds')
             
             ## COLLECT DATA ##
@@ -285,7 +287,7 @@ def data_collection(input):
 
             ## CLEAN UP FILES ## 
             os.system('rm -r '+pre_name+'_'+'scalCls.dat')
-            #os.system('rm -r '+pre_name+'_'+'deriv_params')
+            os.system('rm -r '+pre_name+'_'+'deriv_params')
             for j in range(len(z_lens) + 2): #AL modif
                 os.system('rm -r '+pre_name+'_'+'matterpower_'+str(j+1)+'.dat')
                 transfer_fname = pre_name+'_'+'transfer_'+str(j+1)+'.dat'
@@ -360,36 +362,36 @@ def data_collection(input):
     ## set up index of .pkl file ##
     index_pkl = str(index_pkl_name)
     ## Finish setting up ##
-    data_pkl = '/home/renee/axionEmuDat/data_C_ell_'+index_pkl+'.pkl'
+    data_pkl = '/home/keir/keir/data_C_ell_'+index_pkl+'.pkl'
     print('Dump data to '+data_pkl+'...')
     f = open(data_pkl,'wb')
     pickle.dump(collection,f)
     f.close()
-    data_pkl = '/home/renee/axionEmuDat/data_P_k_linear_1_'+index_pkl+'.pkl'
+    data_pkl = '/home/keir/keir/data_P_k_linear_1_'+index_pkl+'.pkl'
     print('Dump data to '+data_pkl+'...')
     f = open(data_pkl,'wb')
     pickle.dump(collection_1,f)
     f.close()
-    data_pkl = '/home/renee/axionEmuDat/data_P_k_linear_2_'+index_pkl+'.pkl'
+    data_pkl = '/home/keir/keir/data_P_k_linear_2_'+index_pkl+'.pkl'
     print('Dump data to '+data_pkl+'...')
     f = open(data_pkl,'wb')
     pickle.dump(collection_2,f)
     f.close()
 
     # rh added derived params
-    data_pkl = '/home/renee/axionEmuDat/data_derivedparams_'+index_pkl+'.pkl'
+    data_pkl = '/home/keir/keir/data_derived_params_'+index_pkl+'.pkl'
     print('Dump data to '+data_pkl+'...')
     f = open(data_pkl,'wb')
     pickle.dump(collection_deriv,f)
     f.close()
 
-    data_pkl = '/home/renee/axionEmuDat/data_P_k_nonlinear_1_'+index_pkl+'.pkl'
+    data_pkl = '/home/keir/keir/data_P_k_nonlinear_1_'+index_pkl+'.pkl'
     print('Dump data to '+data_pkl+'...')
     f = open(data_pkl,'wb')
     pickle.dump(collection_3,f)
     f.close()
 
-    data_pkl = '/home/renee/axionEmuDat/data_P_k_nonlinear_2_'+index_pkl+'.pkl'
+    data_pkl = '/home/keir/keir/data_P_k_nonlinear_2_'+index_pkl+'.pkl'
     print('Dump data to '+data_pkl+'...')
     f = open(data_pkl,'wb')
     pickle.dump(collection_4,f)
@@ -401,21 +403,21 @@ def data_collection(input):
 
 if __name__ == '__main__':
     inputs_list = []
-    number_cores = 60 # number of cores you want to use in collecting data
-    root  = 'LHD_parameters_NL_200k_HMcode_fixh2_'
+    number_cores = 10 # number of cores you want to use in collecting data
+    root  = 'LH_ACT_DR6_TTTEEEPP_vary_cosmo_test_wide_derived_'
     for i in range(number_cores):
-        pkl_name = '/home/renee/axionEmuDat/'+root+str(i)+'.pkl'
+        pkl_name = '/home/keir/keir/'+root+str(i)+'.pkl'
         outputs_name = root + str(i)
-        os_name = '/home/renee/axionEmuDat/'+root + str(i)
-        pre_name = '/home/renee/axionEmuDat/'+root + str(i) + '/'+root + str(i) + '_'
+        os_name = '/home/keir/keir/'+root + 'inifile_' + str(i)
+        pre_name = '/home/keir/keir/'+root + str(i) + '/'+root + str(i) + '_'
         ele = (pkl_name, outputs_name, os_name, pre_name)
         inputs_list.append(ele)
     start_time = time()
-    #p = Pool(number_cores)
-    #p.map(data_collection,inputs_list)
-    data_collection(('/home/renee/axionEmuDat/LHD_parameters_NL_200k_HMcode_fixh2_0.pkl','LHD_parameters_NL_200k_HMcode_fixh2_0','test_osr_0','test_0_'))
-    #p.close()
-    #p.join()
+    p = Pool(number_cores)
+    p.map(data_collection,inputs_list)
+    #data_collection(('/home/renee/axionEmuDat/LHD_parameters_NL_200k_HMcode_fixh2_0.pkl','LHD_parameters_NL_200k_HMcode_fixh2_0','test_osr_0','test_0_'))
+    p.close()
+    p.join()
     end_time = time()
     print(end_time-start_time)
 
