@@ -222,6 +222,71 @@ def data_collection(input):
             l_index = unlensed_cls[:,0]
             k_index, matter_mg = np.loadtxt(pre_name+'_'+'matterpower_' + str(len(z_lens) + 1) + '.dat', unpack = True) #Linear matter power
             k_index2, matter_mg2 = np.loadtxt(pre_name+'_'+'matterpower_' + str(len(z_lens) + 2) +'.dat', unpack = True)
+            print('Finished loading power spectra')
+
+            ## NEED TO INSERT READING THE PARAMS OUTFILE HERE # rh added derived params
+            # print(pre_name+'_deriv_params', '*****')
+            '''df=open(pre_name+'_deriv_params')
+            dlines=df.readlines()
+            df.close()
+
+            # for l, line in enumerate(dlines):
+            #     print(line.split(), l)
+            # print('------')
+            # for key in collection_deriv:
+            #     print(key)
+
+            collection_deriv['100*theta_s'].append(float(dlines[17].split()[2]))
+            collection_deriv['sigma8'].append(float(dlines[2].split()[2]))
+            collection_deriv['YHe'].append(float(dlines[6].split()[2]))
+            collection_deriv['z_reio'].append(float(dlines[0].split()[2]))
+            collection_deriv['Neff'].append(float(dlines[1].split()[2]))
+            collection_deriv['tau_rec'].append(float(dlines[4].split()[2]))
+            collection_deriv['z_rec'].append(float(dlines[5].split()[2]))
+            collection_deriv['rs_rec'].append(float(dlines[7].split()[2]))
+            collection_deriv['ra_rec'].append(float(dlines[8].split()[2]))
+            collection_deriv['tau_star'].append(float(dlines[9].split()[2]))
+            collection_deriv['z_star'].append(float(dlines[10].split()[2]))
+            collection_deriv['rs_star'].append(float(dlines[11].split()[2]))
+            collection_deriv['ra_star'].append(float(dlines[12].split()[2]))
+            collection_deriv['rs_drag'].append(float(dlines[13].split()[2]))
+            collection_deriv['age'].append(float(dlines[14].split()[4]))
+            collection_deriv['kd_star'].append(float(dlines[20].split()[3]))
+            collection_deriv['z_drag'].append(float(dlines[18].split()[2]))
+            collection_deriv['100*theta_d'].append(float(dlines[21].split()[2]))
+            
+            baos = np.loadtxt(pre_name+'_deriv_params_BAO', skiprows=1)
+            collection_deriv['zBAO'].append(baos[:,0])
+            collection_deriv['HBAO'].append(baos[:,1])
+            collection_deriv['DABAO'].append(baos[:,2])
+            collection_deriv['rsBAO'].append(baos[:,3])
+            print('Finished loading derived parameters')
+            '''
+
+            os.system('rm ' + params_ini_file + '_copy')
+            os.system('rm -r '+pre_name+'_'+'params.ini')
+            
+            ## PERFORM NON-LINEAR TRANSFORMS & LENSING ##
+            T_path = pre_name+'_'+'transfer_'
+            ucls = np.zeros((len(l_index)+2, 4))
+            C_tt = unlensed_cls[:,1]
+            C_ee = unlensed_cls[:,2]
+            C_te = unlensed_cls[:,3]
+            
+            ucls[:,0][2:] = C_tt # set C_ell =0 for ell=0,1 
+            ucls[:,1][2:] = C_ee
+            ucls[:,3][2:] = C_te
+            
+            C_phi, PkNL, PkL, k_out, z_out, weyl = do_non_linear_lensing(H_0, omega_cdm, omega_b, A_s, n_s, ma, omega_ax, gamma_1, gamma_2, z_lens, T_path)
+            print('Finished calculating non-linear lensing')
+            
+            C_tt, C_ee, C_bb, C_te = correlations.lensed_cls(ucls, C_phi).T
+            #C_tt, C_ee, C_bb, C_te = ucls.T
+
+            #Non-linear matter power
+            matter_mg3, k_index3 = do_non_linear_lensing(H_0, omega_cdm, omega_b, A_s, n_s, ma, omega_ax, gamma_1, gamma_2, np.array([z1,]), T_path+str(len(z_lens) + 1), return_matter_power=True)
+            matter_mg4, k_index4 = do_non_linear_lensing(H_0, omega_cdm, omega_b, A_s, n_s, ma, omega_ax, gamma_1, gamma_2, np.array([z2,]), T_path+str(len(z_lens) + 2), return_matter_power=True)
+            print('Finished calculating non-linear matter power')
 
             ## NEED TO INSERT READING THE PARAMS OUTFILE HERE # rh added derived params
             # print(pre_name+'_deriv_params', '*****')
@@ -253,41 +318,18 @@ def data_collection(input):
             collection_deriv['kd_star'].append(float(dlines[20].split()[3]))
             collection_deriv['z_drag'].append(float(dlines[18].split()[2]))
             collection_deriv['100*theta_d'].append(float(dlines[21].split()[2]))
-            
+
             baos = np.loadtxt(pre_name+'_deriv_params_BAO', skiprows=1)
-            collection_deriv['zBAO']=baos[:,0]
-            collection_deriv['HBAO']=baos[:,1]
-            collection_deriv['DABAO']=baos[:,2]
-            collection_deriv['rsBAO']=baos[:,3]
-
-            os.system('rm ' + params_ini_file + '_copy')
-            os.system('rm -r '+pre_name+'_'+'params.ini')
-            
-            ## PERFORM NON-LINEAR TRANSFORMS & LENSING ##
-            T_path = pre_name+'_'+'transfer_'
-            ucls = np.zeros((len(l_index)+2, 4))
-            C_tt = unlensed_cls[:,1]
-            C_ee = unlensed_cls[:,2]
-            C_te = unlensed_cls[:,3]
-            
-            ucls[:,0][2:] = C_tt # set C_ell =0 for ell=0,1 
-            ucls[:,1][2:] = C_ee
-            ucls[:,3][2:] = C_te
-            
-            C_phi, PkNL, PkL, k_out, z_out, weyl = do_non_linear_lensing(H_0, omega_cdm, omega_b, A_s, n_s, ma, omega_ax, gamma_1, gamma_2, z_lens, T_path)
-            print('Finished calculating non-linear lensing')
-            
-            C_tt, C_ee, C_bb, C_te = correlations.lensed_cls(ucls, C_phi).T
-            #C_tt, C_ee, C_bb, C_te = ucls.T
-
-            #Non-linear matter power
-            matter_mg3, k_index3 = do_non_linear_lensing(H_0, omega_cdm, omega_b, A_s, n_s, ma, omega_ax, gamma_1, gamma_2, np.array([z1,]), T_path+str(len(z_lens) + 1), return_matter_power=True)
-            matter_mg4, k_index4 = do_non_linear_lensing(H_0, omega_cdm, omega_b, A_s, n_s, ma, omega_ax, gamma_1, gamma_2, np.array([z2,]), T_path+str(len(z_lens) + 2), return_matter_power=True)
-            print('Finished calculating non-linear matter power')
+            collection_deriv['zBAO'].append(baos[:,0])
+            collection_deriv['HBAO'].append(baos[:,1])
+            collection_deriv['DABAO'].append(baos[:,2])
+            collection_deriv['rsBAO'].append(baos[:,3])
+            print('Finished loading derived parameters')
 
             ## CLEAN UP FILES ## 
             os.system('rm -r '+pre_name+'_'+'scalCls.dat')
             os.system('rm -r '+pre_name+'_'+'deriv_params')
+            os.system('rm -r '+pre_name+'_'+'deriv_params_BAO')
             for j in range(len(z_lens) + 2): #AL modif
                 os.system('rm -r '+pre_name+'_'+'matterpower_'+str(j+1)+'.dat')
                 transfer_fname = pre_name+'_'+'transfer_'+str(j+1)+'.dat'
@@ -358,6 +400,7 @@ def data_collection(input):
     collection_2['params'] = t_params2
     collection_3['params'] = t_params3
     collection_4['params'] = t_params4
+    collection_deriv['params'] = t_params
 
     ## set up index of .pkl file ##
     index_pkl = str(index_pkl_name)
@@ -403,8 +446,8 @@ def data_collection(input):
 
 if __name__ == '__main__':
     inputs_list = []
-    number_cores = 10 # number of cores you want to use in collecting data
-    root  = 'LH_ACT_DR6_TTTEEEPP_vary_cosmo_test_wide_derived_'
+    number_cores = 30 # number of cores you want to use in collecting data
+    root  = 'LH_ACT_DR6_TTTEEEPP_derived_120_axion_'
     for i in range(number_cores):
         pkl_name = '/home/keir/keir/'+root+str(i)+'.pkl'
         outputs_name = root + str(i)
