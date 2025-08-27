@@ -238,18 +238,18 @@ number_of_threads      = 0
 #but high_accuracy_default is efficient
 #high_accuracy_default = T is always turned on in current and future versions
 
-high_accuracy_default = T
+high_accuracy_default = F
 
 #Increase accuracy_boost to decrease time steps, use more k values,  etc.
 #Decrease to speed up at cost of worse accuracy. Suggest 0.8 to 3.
-accuracy_boost = 4
+accuracy_boost = 2
 
 
 #Larger to keep more terms in the hierarchy evolution.
-l_accuracy_boost = 4
+l_accuracy_boost = 2
 
 #Increase to use more C_l values for interpolation.
 #Increasing a bit will improve the polarization accuracy at l up to 200 -
 #interpolation errors may be up to 3%
 #Decrease to speed up non-flat models a bit
-l_sample_boost          = 4
+l_sample_boost          = 2
