@@ -154,7 +154,7 @@ def do_non_linear_lensing(H0, omch2, ombh2, As, ns, m_ax, omaxh2, gamma_1, gamma
     cosmos['M_max'] = 18
     cosmos['k_piv'] = 0.05
     cosmos['z']     = 0.
-    cosmos['transfer_kmax'] = 10 #20
+    cosmos['transfer_kmax'] = 100 #10 #20
 
     #cosmos['gamma_1'] = gamma_1
     #cosmos['gamma_2'] = gamma_2
@@ -230,7 +230,7 @@ def do_non_linear_lensing(H0, omch2, ombh2, As, ns, m_ax, omaxh2, gamma_1, gamma
             Pweyl_list_cdm.append(Pweyl_cdm.P(cosmos_specific_z['z'], power_spec_dic['k']))
         #k_list.append(power_spec_dic['k'])
         
-        if cosmos_specific_z['z'] >= 6.5: #zs[i] >= 6.5:
+        if cosmos_specific_z['z'] >= 4: #4: #4: #4: #6.5: #zs[i] >= 6.5:
             PkNL_list.append(power_spec_dic['power_total'])
         
         else:

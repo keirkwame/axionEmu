@@ -92,7 +92,7 @@ def data_collection(input):
     
     # AL add z_lens generated from comoving distance
     z_lens = cp.deepcopy(np.loadtxt('../nonlinear/optimal_z_array.dat'))
-    z_lens = np.concatenate((z_lens[z_lens <= 4.][::2], z_lens[z_lens > 4.][::4]))
+    #z_lens = np.concatenate((z_lens[z_lens <= 4.][::2], z_lens[z_lens > 4.][::4]))
     print('z_lens =', z_lens)
 
     for key in params:
@@ -290,7 +290,7 @@ def data_collection(input):
 
             ## NEED TO INSERT READING THE PARAMS OUTFILE HERE # rh added derived params
             # print(pre_name+'_deriv_params', '*****')
-            '''df=open(pre_name+'_deriv_params')
+            df=open(pre_name+'_deriv_params')
             dlines=df.readlines()
             df.close()
 
@@ -325,12 +325,11 @@ def data_collection(input):
             collection_deriv['DABAO'].append(baos[:,2])
             collection_deriv['rsBAO'].append(baos[:,3])
             print('Finished loading derived parameters')
-            '''
 
             ## CLEAN UP FILES ## 
             os.system('rm -r '+pre_name+'_'+'scalCls.dat')
-            #os.system('rm -r '+pre_name+'_'+'deriv_params')
-            #os.system('rm -r '+pre_name+'_'+'deriv_params_BAO')
+            os.system('rm -r '+pre_name+'_'+'deriv_params')
+            os.system('rm -r '+pre_name+'_'+'deriv_params_BAO')
             for j in range(len(z_lens) + 2): #AL modif
                 os.system('rm -r '+pre_name+'_'+'matterpower_'+str(j+1)+'.dat')
                 transfer_fname = pre_name+'_'+'transfer_'+str(j+1)+'.dat'
@@ -447,8 +446,8 @@ def data_collection(input):
 
 if __name__ == '__main__':
     inputs_list = []
-    number_cores = 2 # number of cores you want to use in collecting data
-    root  = 'LH_ACT_DR6_TTTEEEPP_derived_Planck_LCDM_gfortran_orig_fast_'
+    number_cores = 60 # number of cores you want to use in collecting data
+    root  = 'LH_ACT_DR6_TTTEEEPP_200k_axion_'
     for i in range(number_cores):
         pkl_name = '/home/keir/keir/'+root+str(i)+'.pkl'
         outputs_name = root + str(i)

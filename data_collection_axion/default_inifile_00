@@ -150,7 +150,7 @@ CMB_outputscale = 7.4311e12
 # use transfer_interp_matterpower =F to output calculated values (e.g. for later interpolation)
 transfer_high_precision = T
 
-transfer_kmax = 10
+transfer_kmax = 30
 
 transfer_k_per_logint = 10
 
@@ -225,7 +225,7 @@ accurate_reionization  = T
 do_tensor_neutrinos    = T
 
 #Whether to turn off small-scale late time radiation hierarchies (save time,v. accurate)
-do_late_rad_truncation = T
+do_late_rad_truncation = F
 
 #Computation parameters
 #if number_of_threads=0 assigned automatically
@@ -238,7 +238,7 @@ number_of_threads      = 0
 #but high_accuracy_default is efficient
 #high_accuracy_default = T is always turned on in current and future versions
 
-high_accuracy_default = F
+high_accuracy_default = T
 
 #Increase accuracy_boost to decrease time steps, use more k values,  etc.
 #Decrease to speed up at cost of worse accuracy. Suggest 0.8 to 3.
