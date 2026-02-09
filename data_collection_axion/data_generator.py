@@ -446,8 +446,8 @@ def data_collection(input):
 
 if __name__ == '__main__':
     inputs_list = []
-    number_cores = 60 # number of cores you want to use in collecting data
-    root  = 'LH_ACT_DR6_TTTEEEPP_200k_axion_'
+    number_cores = 5 # number of cores you want to use in collecting data
+    root  = 'LH_ACT_DR6_TTTEEEPP_5high_axion_'
     for i in range(number_cores):
         pkl_name = '/home/keir/keir/'+root+str(i)+'.pkl'
         outputs_name = root + str(i)
