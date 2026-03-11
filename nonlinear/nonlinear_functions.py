@@ -36,6 +36,59 @@ from axion_functions import axion_params
 
 from cosmology.overdensities import *
 
+# Import pyHMcode AL modif 02/2026 
+import hmcode
+
+# AL modif 02/2026
+def LCDM_hmcode(k_array, cosmo_dic):
+    """
+    Compute the nonlinear pk with/without the tweaks for CDM
+    using CAMB and the python version of HMcode
+    Returns the nonlinear correction to apply to the Pknl from axionHMcode
+    (used without tweaks)
+    """
+    kmax = cosmo_dic['transfer_kmax']
+
+    omch2 = cosmo_dic['omega_d_0'] + cosmo_dic['omega_ax_0'] # total DM content used for CDM cosmo
+
+    ## WITH TWEAKS ##
+    pars =  camb.set_params(H0=100*cosmo_dic['h'], ombh2=cosmo_dic['omega_b_0'],
+                        omch2=omch2, ns=cosmo_dic['ns'],
+                        mnu=0.06, omk=0,
+                       As=cosmo_dic['As'], halofit_version='mead2020', lmax=3000, tau = 0.06)
+
+    pars.set_matter_power(redshifts=[cosmo_dic['z']], kmax=kmax)
+    results = camb.get_results(pars)
+
+    pars.NonLinear = model.NonLinear_both
+    results.calc_power_spectra(pars)
+    kh_nonlin, z_nonlin, pk_nonlin = results.get_matter_power_spectrum(minkh=1e-4, maxkh=kmax, npoints = 400)
+        
+    
+    ## NO TWEAKS ##
+    pars =  camb.set_params(H0=100*cosmo_dic['h'], ombh2=cosmo_dic['omega_b_0'],
+                        omch2=omch2, ns=cosmo_dic['ns'],
+                        mnu=0.06, omk=0,
+                       As=cosmo_dic['As'], halofit_version='mead2020', lmax=3000, tau = 0.06)
+
+    
+    pars.set_matter_power(redshifts=[cosmo_dic['z']], kmax=kmax)
+    results = camb.get_results(pars)
+    
+    pk_nonlin_no_tweaks = hmcode.power(kh_nonlin, z_nonlin, results, T_AGN=None, verbose=False, tweaks=False, Mmin=1.e+7, Mmax=1.e+18, nM=100)
+
+    # Function to account the nonlinear compounding effect of axionCAMB vs CAMB
+    func = lambda x, a, b, c : a*np.exp(-c*(x-b)**2)
+    par = [0.00937096, -0.67995911,  0.39079442]
+    x = np.log10(k_array)
+    corr = 1. / (1.+func(x, *par))
+
+    # All Pks are evaluated at LCDM cosmology
+    pk_nonlin = CubicSpline(kh_nonlin, pk_nonlin[0])(k_array) 
+    pk_nonlin_no_tweaks = CubicSpline(kh_nonlin, pk_nonlin_no_tweaks[0])(k_array)
+    nonlin_corr = corr / pk_nonlin_no_tweaks * pk_nonlin
+    
+    return nonlin_corr
 
 def get_limber_clkk_flat_universe(results, interp_pk, lmax, kmax, nz, zsrc=None):
     # Adapting code from Antony Lewis' CAMB notebook
@@ -241,24 +294,26 @@ def do_non_linear_lensing(H0, omch2, ombh2, As, ns, m_ax, omaxh2, gamma_1, gamma
                                                            power_spec_dic['k'],
                                                            power_spec_dic['power_cold'])
             print('Calculated hmcode_params')
-            axion_param = axion_params.func_axion_param_dic(M_arr, cosmos_specific_z, power_spec_dic, hmcode_params, concentration_param=True) #eta_given=False) #interp
+            # AL modif 02/2026 turned tweaks to False
+            axion_param = axion_params.func_axion_param_dic(M_arr, cosmos_specific_z, power_spec_dic, hmcode_params, concentration_param=False) #eta_given=False) #interp
             print('Calculated axion_param')
             PS_matter_nonlin = PS_nonlin_axion.func_full_halo_model_ax(M_arr, 
                                                                        power_spec_dic, 
                                                                        cosmos_specific_z, 
                                                                        hmcode_params, 
                                                                        axion_param, 
-                                                                       alpha = True, 
-                                                                       eta_given = True, 
+                                                                       alpha = False, 
+                                                                       eta_given = False, 
                                                                        one_halo_damping = True, 
-                                                                       two_halo_damping = True,
-                                                                       concentration_param=True,
+                                                                       two_halo_damping = False,
+                                                                       concentration_param=False,
                                                                        full_2h = False)
             #print('PS_matter_nonlin =', PS_matter_nonlin)
             print('Calculated PS_matter_nonlin')
-            nu_nl_corr = neutrino_nonlin_correction(power_spec_dic['k'], cosmos_specific_z)
+            #nu_nl_corr = neutrino_nonlin_correction(power_spec_dic['k'], cosmos_specific_z) # AL modif 02/2026
             #PS_matter_nonlin[0] *= nu_nl_corr
-            ps_m_n = PS_matter_nonlin[0] * nu_nl_corr
+            nl_corr = LCDM_hmcode(power_spec_dic['k'], cosmos_specific_z)
+            ps_m_n = PS_matter_nonlin[0] * nl_corr
             PkNL_list.append(ps_m_n)
     
     # Non-linear transfer function
